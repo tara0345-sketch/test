@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>안산교회 차량예약시스템</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #003366;
+            --primary-hover: #002244;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --border-radius: 12px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px 10px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* 헤더 스타일 */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .header p {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* 카드 스타일 */
+        .card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 캘린더 토글 섹션 */
+        .calendar-toggle {
+            cursor: pointer;
+            background: #e8f0fe;
+            color: var(--primary-color);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        .calendar-toggle:hover {
+            background: #d0e1fd;
+        }
+        .calendar-content {
+            display: none;
+            margin-top: 15px;
+            animation: slideDown 0.3s ease-out;
+        }
+        .calendar-content.active {
+            display: block;
+        }
+        .calendar-wrapper {
+            position: relative;
+            padding-bottom: 75%; /* 4:3 비율 */
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+        .calendar-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* 폼 스타일 */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .form-full {
+            grid-column: span 2;
+        }
+
+        .form-group {
+            margin-bottom: 5px; /* 그리드 갭으로 대체 */
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box;
+            background-color: #fafafa;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+            background-color: #fff;
+        }
+
+        /* 플레이스홀더 스타일 */
+        ::placeholder { color: #aaa; }
+
+        /* 약관 박스 */
+        .agreement-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            font-size: 0.9rem;
+            color: #555;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        .agreement-box strong { color: var(--primary-color); }
+        .agreement-box ul { padding-left: 20px; }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f0fe;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .checkbox-wrapper input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .checkbox-wrapper label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* 버튼 */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .submit-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 로딩 오버레이 */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .loading-text {
+            margin-top: 20px;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 모바일 대응 */
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-full {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="header">
+            <h1><i class="fa-solid fa-church"></i> 안산교회 차량예약</h1>
+            <p>편리하고 안전한 차량 이용을 위해 예약해주세요</p>
+        </header>
+
+        <div class="card">
+            <div class="calendar-toggle" onclick="toggleCalendar()">
+                <span><i class="fa-regular fa-calendar-check"></i> 현재 예약 현황 확인하기</span>
+                <i class="fa-solid fa-chevron-down" id="toggleIcon"></i>
+            </div>
+            <div class="calendar-content" id="calendarContent">
+                <div class="calendar-wrapper">
+                    <iframe src="https://calendar.google.com/calendar/embed?src=10263285edd19de93d9af3612d15a7c464b99f93d10f306e9a8576cbe181efe4@group.calendar.google.com&ctz=Asia%2FSeoul&mode=month" scrolling="no"></iframe>
+                </div>
+                <p style="font-size: 0.8rem; color: #888; text-align: center; margin-top: 10px;">
+                    ※ 캘린더는 실시간 업데이트되며, 관리자 승인 후 반영됩니다.
+                </p>
+            </div>
+        </div>
+
+        <form id="vehicleReservationForm" class="card">
+            <h2><i class="fa-solid fa-pen-to-square"></i> 예약 정보 입력</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="applicantName">신청자 성함</label>
+                    <input type="text" id="applicantName" name="applicantName" placeholder="홍길동" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="numberOfPeople">탑승 인원</label>
+                    <input type="text" id="numberOfPeople" name="numberOfPeople" placeholder="예: 5명" required>
+                </div>
+
+                <div class="form-group form-full">
+                    <label>차량 이용 기간</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <input type="text" id="startDateTime" placeholder="출발 일시 선택" required>
+                        </div>
+                        <div style="display:flex; align-items:center; color:#888;">~</div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <input type="text" id="endDateTime" placeholder="반납 일시 선택" required>
+                        </div>
+                    </div>
+                    <input type="hidden" id="departureDateTime" name="departureDateTime">
+                    <input type="hidden" id="arrivalDateTime" name="arrivalDateTime">
+                </div>
+
+                <div class="form-group form-full">
+                    <label for="destination">목적지</label>
+                    <input type="text" id="destination" name="destination" placeholder="예: 가평 수양관" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="numberOfVans">승합차 필요 대수</label>
+                    <select id="numberOfVans" name="numberOfVans" required>
+                        <option value="">선택하세요</option>
+                        <option value="0대">필요 없음 (0대)</option>
+                        <option value="1대">1대</option>
+                        <option value="2대">2대</option>
+                        <option value="3대">3대</option>
+                        <option value="4대">4대</option>
+                        <option value="5대">5대</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="busNeeded">버스 필요 여부</label>
+                    <select id="busNeeded" name="busNeeded" required>
+                        <option value="">선택하세요</option>
+                        <option value="아니요">필요 없음</option>
+                        <option value="1대">1대</option>
+                        <option value="2대">2대</option>
+                    </select>
+                </div>
+
+                <div class="form-group form-full">
+                    <label for="purpose">사용 용도</label>
+                    <input type="text" id="purpose" name="purpose" placeholder="예: 청년부 하계 수련회" required>
+                </div>
+            </div>
+        </form>
+
+        <div class="card">
+            <h2><i class="fa-solid fa-circle-info"></i> 안내사항 및 동의</h2>
+            <div class="agreement-box">
+                <p><strong>[교회 차량 운영 원칙]</strong></p>
+                <p>차량은 용도에 따라 <strong>교회지원</strong>과 <strong>사용자 부담</strong>으로 구분됩니다.</p>
+                <ul>
+                    <li><strong>교회지원:</strong> 공식 일정, 봉사 목적 (유류비/톨비 지원)</li>
+                    <li><strong>사용자부담:</strong> 비공식 일정 (유류비/톨비 사용자 부담)</li>
+                </ul>
+                <p class="text-sm" style="color:#888; margin-top:5px;">※ 공식일정: 연/월간 계획 및 주보 광고된 행사</p>
+                <hr style="border: 0; border-top: 1px dashed #ccc; margin: 10px 0;">
+                <p><strong>[담당자 연락처]</strong></p>
+                <p>
+                    관리자: 신현구 형제 (010-7345-2253)<br>
+                    차량배정: 최상돈 집사 (010-7172-9401)<br>
+                    버스배정: 윤종식 집사 (010-7172-9401)
+                </p>
+            </div>
+            
+            <div class="checkbox-wrapper" onclick="document.getElementById('agreement').click()">
+                <input type="checkbox" id="agreement" name="agreement" required>
+                <label for="agreement">위 내용을 확인하였으며 동의합니다.</label>
+            </div>
+        </div>
+
+        <button type="submit" form="vehicleReservationForm" class="submit-btn">
+            <i class="fa-solid fa-paper-plane"></i> 예약 신청하기
+        </button>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">예약 정보를 전송 중입니다...</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // 캘린더 토글 기능
+        function toggleCalendar() {
+            const content = document.getElementById('calendarContent');
+            const icon = document.getElementById('toggleIcon');
+            content.classList.toggle('active');
+            
+            if (content.classList.contains('active')) {
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('vehicleReservationForm');
+            const webAppUrl = 'https://script.google.com/macros/s/AKfycbyg7IXdiIqTrnr1qPCys5kOaf-GvSztcerl-D3IWTiVBipclr0b1_SA2D21nPZgXQs1/exec';
+            const loadingOverlay = document.getElementById('loadingOverlay');
+
+            // Flatpickr 설정 (날짜+시간 통합)
+            const commonConfig = {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                locale: "ko",
+                time_24hr: true,
+                disableMobile: "true", // 모바일에서도 네이티브 피커 대신 이쁜 UI 사용
+                minuteIncrement: 10
+            };
+
+            const fpStart = flatpickr("#startDateTime", {
+                ...commonConfig,
+                onChange: function(selectedDates, dateStr, instance) {
+                    // 시작일 선택 시 종료일의 최소 날짜를 시작일로 설정
+                    fpEnd.set('minDate', dateStr);
+                    // 시작일 선택 시 자동으로 종료일을 1시간 뒤로 설정해주면 더 편함 (옵션)
+                    if (selectedDates[0] && !fpEnd.selectedDates.length) {
+                        const nextHour = new Date(selectedDates[0].getTime() + 60 * 60 * 1000);
+                        fpEnd.setDate(nextHour);
+                    }
+                }
+            });
+
+            const fpEnd = flatpickr("#endDateTime", {
+                ...commonConfig
+            });
+
+            form.addEventListener('submit', async function (event) {
+                event.preventDefault();
+
+                // 유효성 검사: 동의 여부
+                if (!document.getElementById('agreement').checked) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '잠시만요!',
+                        text: '안내사항 및 동의에 체크해주셔야 합니다.',
+                        confirmButtonColor: '#003366'
+                    });
+                    return;
+                }
+
+                const startVal = document.getElementById('startDateTime').value;
+                const endVal = document.getElementById('endDateTime').value;
+
+                if (!startVal || !endVal) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '시간 미입력',
+                        text: '출발 및 반납 시간을 정확히 선택해주세요.',
+                        confirmButtonColor: '#003366'
+                    });
+                    return;
+                }
+
+                // 날짜 포맷 변환 (T 형식으로) - 기존 서버 로직 유지를 위해
+                const formatForServer = (dateStr) => dateStr.replace(' ', 'T');
+                
+                document.getElementById('departureDateTime').value = formatForServer(startVal);
+                document.getElementById('arrivalDateTime').value = formatForServer(endVal);
+
+                // 시간 검증
+                if (startVal >= endVal) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '시간 설정 오류',
+                        text: '반납 시간은 출발 시간보다 늦어야 합니다.',
+                        confirmButtonColor: '#003366'
+                    });
+                    return;
+                }
+
+                // 로딩 표시
+                loadingOverlay.style.display = 'flex';
+
+                const formData = new FormData(form);
+                // agreement 체크박스는 전송 데이터에서 제외 (서버가 필요 없다면)
+                if(formData.has('agreement')) formData.delete('agreement');
+
+                const data = {};
+                for (let [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+
+                try {
+                    const response = await fetch(webAppUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams(data).toString()
+                    });
+
+                    loadingOverlay.style.display = 'none';
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.status === 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '예약 신청 완료!',
+                                text: '담당자가 확인 후 연락드리겠습니다.',
+                                confirmButtonColor: '#003366'
+                            }).then(() => {
+                                form.reset();
+                                fpStart.clear();
+                                fpEnd.clear();
+                                document.getElementById('agreement').checked = false;
+                            });
+                        } else {
+                            throw new Error(result.message);
+                        }
+                    } else {
+                        throw new Error('서버 응답 오류: ' + response.status);
+                    }
+                } catch (error) {
+                    loadingOverlay.style.display = 'none';
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: '신청 실패',
+                        text: '오류가 발생했습니다. 잠시 후 다시 시도해주세요.\n(' + error.message + ')',
+                        confirmButtonColor: '#003366'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
