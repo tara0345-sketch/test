@@ -4,39 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
     <title>안산교회 모바일 소식지</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
     <style>
-        body { background-color: #FDF9F1; margin: 0; padding: 0; font-family: 'Malgun Gothic', sans-serif; color: #333; }
-        .header { text-align: center; padding: 15px; background: white; font-weight: bold; color: #1A365D; border-bottom: 1px solid #E5D9C5; }
+        /* 1. 전체 디자인 테마 (웜 화이트 & 모던 고딕) */
+        body { background-color: #F9FAFC; margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; color: #333; }
+        .header { text-align: center; padding: 20px 15px; background: white; font-weight: 700; color: #004D7F; border-bottom: 1px solid #E6E8EB; font-size: 20px; letter-spacing: -0.5px; }
         
-        /* 주보 영역 */
-        .swiper-container { width: 100%; height: 75vh; background: #F5EFE1; position: relative; opacity: 0; transition: opacity 0.3s; }
+        /* 2. 주보 슬라이드 영역 (심플 화이트 배경) */
+        .swiper-container { width: 100%; height: 75vh; background: #fff; position: relative; opacity: 0; transition: opacity 0.3s; }
         .swiper-container.loaded { opacity: 1; }
         .swiper-zoom-container { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }
-        .swiper-slide img { max-width: 95%; max-height: 95%; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 4px; background: white; }
+        .swiper-slide img { max-width: 95%; max-height: 95%; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 6px; background: white; }
         
-        /* 하단 추가 섹션들 */
-        .section { padding: 25px 20px; background: white; border-bottom: 8px solid #FDF9F1; }
-        .section-title { font-size: 19px; font-weight: bold; color: #1A365D; margin-bottom: 15px; display: flex; align-items: center; }
-        .section-title::before { content: "🕊️"; margin-right: 8px; }
+        /* 3. 하단 섹션 디자인 (넉넉한 여백) */
+        .section { padding: 30px 20px; background: white; border-bottom: 8px solid #F9FAFC; }
+        .section-title { font-size: 19px; font-weight: 700; color: #004D7F; margin-bottom: 20px; display: flex; align-items: center; letter-spacing: -0.5px; }
+        .section-title::before { content: "🕊️"; margin-right: 10px; font-size: 20px; }
         
-        /* 버튼 스타일 */
-        .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; color: white; text-align: center; text-decoration: none; border-radius: 8px; font-weight: bold; box-sizing: border-box; cursor: pointer; border: none; font-size: 16px; }
-        .btn-green { background: #4CAF50; }
-        .btn-blue { background: #007AFF; }
+        /* 4. 버튼 디자인 통일 (오션 블루 모던 버튼) */
+        .btn { display: block; width: 100%; padding: 18px; margin: 15px 0; color: white; text-align: center; text-decoration: none; border-radius: 10px; font-weight: 700; box-sizing: border-box; cursor: pointer; border: none; font-size: 17px; transition: 0.2s; -webkit-tap-highlight-color: transparent; }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
         
-        /* 드롭다운(아코디언) 스타일 */
-        .accordion-btn { background: #FF0000; display: flex; justify-content: space-between; align-items: center; }
-        .accordion-btn::after { content: '▼'; font-size: 14px; transition: 0.3s; }
-        .accordion-btn.active::after { transform: rotate(-180deg); }
-        .panel { background-color: #f9f9f9; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; border-radius: 8px; margin-top: -5px; margin-bottom: 10px; border: 1px solid #eee; border-top: none; }
-        .panel a { display: block; padding: 15px; color: #333; text-decoration: none; border-bottom: 1px solid #ddd; font-size: 15px; }
+        /* 메인 버튼 스타일 */
+        .btn-main { background: #004D7F; box-shadow: 0 4px 10px rgba(0,77,127,0.15); }
+        /* 보조 버튼 스타일 (테두리만 있음) */
+        .btn-outline { background: transparent; color: #004D7F; border: 2px solid #004D7F; margin-top: 10px; }
+
+        /* 5. 드롭다운(아코디언) 디자인 리뉴얼 */
+        .dropdown-wrapper { margin-top: -10px; border-radius: 10px; overflow: hidden; border: 1px solid #E6E8EB; background-color: #fcfcfc; }
+        .dropdown-header { padding: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; color: #333; font-weight: 500; font-size: 16px; border-bottom: 1px solid #E6E8EB; }
+        .dropdown-header::after { content: '▼'; font-size: 12px; transition: 0.3s; color: #bbb; }
+        .dropdown-header.active::after { transform: rotate(-180deg); color: #004D7F; }
+        
+        /* 드롭다운 목록 */
+        .panel { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background-color: #fff; }
+        .panel a { display: block; padding: 18px; color: #555; text-decoration: none; border-bottom: 1px solid #E6E8EB; font-size: 15px; transition: 0.2s; }
         .panel a:last-child { border-bottom: none; }
+        .panel a:active { background-color: #F9FAFC; color: #004D7F; font-weight: 500; }
         
-        /* 사업장 소개 스타일 */
-        .business-card { background: #fff; border: 2px solid #E5D9C5; padding: 15px; border-radius: 8px; }
-        .business-card h3 { margin: 0 0 10px 0; color: #1A365D; font-size: 18px; }
-        .business-card p { margin: 0; font-size: 14px; color: #555; line-height: 1.5; }
+        /* 6. 사업장 소개 디자인 리뉴얼 (심플 보드) */
+        .business-card { background: #fff; border: 1px solid #E6E8EB; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .business-card h3 { margin: 0 0 12px 0; color: #004D7F; font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+        .business-card p { margin: 0; font-size: 14px; color: #666; line-height: 1.6; font-weight: 300; }
     </style>
 </head>
 <body>
@@ -51,19 +61,21 @@
 </div>
 
 <div class="section">
-    <div class="section-title">안산교회 바로가기</div>
+    <div class="section-title">소식 및 바로가기</div>
     
-    <button class="btn accordion-btn">안산교회 링크 모음</button>
-    <div class="panel">
-        <a href="https://www.youtube.com/playlist?list=PLADscL7WFTv7Fzcn9hYcIldyjm-HLGSkb" target="_blank">📺 1. 안산교회 말씀 다시듣기</a>
-        <a href="https://www.youtube.com/@%EC%83%9D%EB%AA%85%EC%9D%98%EB%A7%90%EC%94%80%EC%84%A0%EA%B5%90%ED%9A%8C%EC%95%88%EC%82%B0/featured" target="_blank">🎥 2. 안산교회 유튜브 채널</a>
-        <a href="https://ansan.jbch.org/fellowship/news/list.php?flag=1&chId=89&abtype=&boardId=13976&gCode=11188" target="_blank">🔔 3. 안산교회 띵동</a>
-        <a href="https://ansan.jbch.org/index.php?flag=1&chId=89" target="_blank">🌐 4. 안산교회 홈페이지</a>
+    <div class="dropdown-wrapper">
+        <div class="dropdown-header">안산교회 링크 모음</div>
+        <div class="panel">
+            <a href="https://www.youtube.com/playlist?list=PLADscL7WFTv7Fzcn9hYcIldyjm-HLGSkb" target="_blank">📺 1. 안산교회 말씀 다시듣기</a>
+            <a href="https://www.youtube.com/@%EC%83%9D%EB%AA%85%EC%9D%98%EB%A7%90%EC%94%80%EC%84%A0%EA%B5%90%ED%9A%8C%EC%95%8D%EC%82%B0/featured" target="_blank">🎥 2. 안산교회 유튜브 채널</a>
+            <a href="https://www.jbch.org/ko/" target="_blank">🌐 3. 생명의 말씀 선교회</a>
+            <a href="https://ansan.jbch.org/index.php?flag=1&chId=89" target="_blank">🌐 4. 안산교회 홈페이지</a>
+        </div>
     </div>
 
-    <button class="btn btn-blue" onclick="openEzApp()">Ez성도주소록 앱 열기 📱</button>
+    <a href="#" class="btn btn-main">기도 제목 / 전도 부탁 남기기 📝</a>
     
-    <a href="#" class="btn btn-green">기도 제목 및 전도 부탁 남기기 📝</a>
+    <button class="btn btn-outline" onclick="openEzApp()">Ez성도주소록 앱 열기 📱</button>
 </div>
 
 <div class="section">
@@ -71,11 +83,11 @@
     <div class="business-card">
         <h3>🏢 만나 식당 (홍길동 성도님)</h3>
         <p>정성을 다해 만든 따뜻한 국밥 한 그릇 드시러 오세요! 안산교회 성도님들께는 음료수를 서비스로 드립니다.</p>
-        <p style="margin-top: 10px; font-size: 13px; color: #888;">📍 위치: 안산시 상록구 OO로 123<br>📞 문의: 010-1234-5678</p>
+        <p style="margin-top: 15px; font-size: 13px; color: #999; font-weight: 300;">📍 위치: 안산시 상록구 OO로 123<br>📞 문의: 010-1234-5678</p>
     </div>
 </div>
 
-<div class="section" style="padding-bottom: 50px; text-align: center; color: #888; font-size: 12px; border-bottom: none;">
+<div class="section" style="padding-bottom: 50px; text-align: center; color: #bbb; font-size: 12px; border-bottom: none; font-weight: 300;">
     ⓒ 안산교회. 모든 성도님을 사랑하고 축복합니다.
 </div>
 
@@ -128,9 +140,9 @@
         });
     };
 
-    // 드롭다운(아코디언) 메뉴 동작 로직
-    const accBtn = document.querySelector(".accordion-btn");
-    accBtn.addEventListener("click", function() {
+    // 드롭다운(아코디언) 메뉴 동작 로직 (리뉴얼 대응)
+    const dropdownHeader = document.querySelector(".dropdown-header");
+    dropdownHeader.addEventListener("click", function() {
         this.classList.toggle("active");
         const panel = this.nextElementSibling;
         if (panel.style.maxHeight) {
@@ -142,9 +154,6 @@
 
     // Ez성도주소록 앱 열기 로직
     function openEzApp() {
-        // [수정 포인트] 나중에 앱의 고유 URL 스킴을 알게 되면 아래 주석을 풀고 주소를 넣으세요.
-        // window.location.href = "ezaddress://"; 
-        
         alert("현재 준비 중인 기능입니다.\n앱 고유 주소가 확인되면 바로 앱이 열리도록 연동됩니다!");
     }
 </script>
