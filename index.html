@@ -16,7 +16,7 @@
         .spinner { margin: 0 auto 15px; width: 40px; height: 40px; border: 4px solid rgba(0, 77, 127, 0.1); border-top: 4px solid #004D7F; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 3. 주보 슬라이드 영역 */
+        /* 3. 메인 주보 슬라이드 영역 (처음엔 숨김) */
         .swiper-container { position: relative; width: 100%; height: 75vh; background: #fff; display: none; padding-bottom: 25px; box-sizing: border-box; }
         .swiper-container.loaded { display: block; animation: fadeIn 0.6s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -25,7 +25,7 @@
         .swiper-pagination-bullet-active { background: #004D7F; }
         .swiper-button-next, .swiper-button-prev { color: #004D7F; transform: scale(0.6); }
 
-        .swiper-zoom-container { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }
+        .swiper-zoom-container { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; cursor: pointer; }
         .swiper-slide img { max-width: 95%; max-height: 95%; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 6px; background: white; }
         
         /* 4. 공통 섹션 디자인 */
@@ -43,10 +43,15 @@
         .schedule-img-thumb { width: 100%; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: block; }
         .schedule-hint { font-size: 12px; color: #888; text-align: center; margin-top: 10px; display: flex; justify-content: center; align-items: center; }
         
-        /* 6. 전체화면 줌 모달 */
-        #zoom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; flex-direction: column; }
-        .close-btn { position: absolute; top: 15px; right: 20px; color: white; font-size: 30px; font-weight: bold; cursor: pointer; z-index: 10000; }
+        /* 6. 전체화면 팝업(모달) - 주보 & 일정표 공통 */
+        #zoom-modal, #bulletin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; justify-content: center; }
+        .close-btn { position: absolute; top: 15px; right: 20px; color: white; font-size: 30px; font-weight: bold; cursor: pointer; z-index: 10000; padding: 10px; }
         
+        /* 모달 안에서는 버튼과 점이 하얀색이어야 잘 보입니다 */
+        .modal-nav { color: white !important; }
+        .modal-pagination .swiper-pagination-bullet { background: rgba(255,255,255,0.4); }
+        .modal-pagination .swiper-pagination-bullet-active { background: white; }
+
         /* 7. 드롭다운 및 사업장 디자인 */
         .dropdown-wrapper { border-radius: 10px; overflow: hidden; background-color: #fcfcfc; box-shadow: 0 4px 10px rgba(0,77,127,0.15); }
         .dropdown-header { position: relative; padding: 18px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: white; background: #004D7F; font-weight: 700; font-size: 17px; }
@@ -75,6 +80,7 @@
     <div class="swiper-pagination"></div>
     <div class="swiper-button-next"></div>
     <div class="swiper-button-prev"></div>
+    <div class="schedule-hint" style="position:absolute; bottom:30px; width:100%; z-index:10;">👆 주보를 터치하면 전체화면으로 볼 수 있습니다.</div>
 </div>
 
 <div class="section">
@@ -137,11 +143,24 @@
     </div>
 </div>
 
+<div id="bulletin-modal">
+    <div class="close-btn" onclick="closeBulletinModal()">✕</div>
+    <div class="swiper-container" id="bulletin-modal-swiper" style="display: block; background: transparent; height: 100%; padding-bottom: 0;">
+        <div class="swiper-wrapper" id="bulletin-modal-wrapper"></div>
+        <div class="swiper-pagination modal-pagination" style="bottom: 20px !important;"></div>
+        <div class="swiper-button-next modal-nav"></div>
+        <div class="swiper-button-prev modal-nav"></div>
+    </div>
+</div>
+
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 <script>
     // --- 1. 주보 이미지 로딩 및 자르기 ---
     const img = new Image();
     img.src = "jubo.jpg"; 
+    
+    // 전체화면 모달에 넣을 잘린 이미지 주소들을 보관할 배열
+    let bulletinImages = []; 
 
     img.onload = async function() {
         const cols = 4; const rows = 2;
@@ -154,7 +173,7 @@
         ];
 
         const wrapper = document.getElementById('bulletin-slides');
-        const promises = order.map(pos => {
+        const promises = order.map((pos, index) => {
             return new Promise(resolve => {
                 const canvas = document.createElement('canvas');
                 canvas.width = pW * scale; canvas.height = pH * scale;
@@ -164,7 +183,10 @@
                 
                 canvas.toBlob(blob => {
                     const blobUrl = URL.createObjectURL(blob);
-                    resolve(`<div class="swiper-slide"><div class="swiper-zoom-container"><img src="${blobUrl}"></div></div>`);
+                    bulletinImages[index] = blobUrl; // 잘린 이미지를 배열에 저장
+                    
+                    // 클릭 시 전체화면 모달이 해당 페이지(index)부터 열리도록 설정
+                    resolve(`<div class="swiper-slide" onclick="openBulletinModal(${index})"><div class="swiper-zoom-container"><img src="${blobUrl}"></div></div>`);
                 }, 'image/jpeg', 1.0); 
             });
         });
@@ -175,14 +197,51 @@
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('main-swiper').classList.add('loaded');
 
+        // 메인 화면용 스와이퍼 (여기서는 단순 스와이프만 제공)
         new Swiper('#main-swiper', {
-            zoom: { maxRatio: 4 }, 
             pagination: { el: '#main-swiper .swiper-pagination', clickable: true },
             navigation: { nextEl: '#main-swiper .swiper-button-next', prevEl: '#main-swiper .swiper-button-prev' }
         });
     };
 
-    // --- 2. 일정표 줌 기능 (모달) 로직 ---
+    // --- 2. 주보 전체화면 줌 기능 (모달) 로직 ---
+    let bulletinModalSwiper;
+
+    function openBulletinModal(startIndex) {
+        const wrapper = document.getElementById('bulletin-modal-wrapper');
+        
+        // 모달 안에 슬라이드가 아직 안 만들어져 있다면 8장을 생성
+        if (wrapper.innerHTML === '') {
+            wrapper.innerHTML = bulletinImages.map(url => 
+                `<div class="swiper-slide" style="background: transparent;"><div class="swiper-zoom-container"><img src="${url}" style="max-width: 100%; max-height: 90vh; border-radius: 0;"></div></div>`
+            ).join('');
+        }
+        
+        document.getElementById('bulletin-modal').style.display = 'flex';
+        
+        if (!bulletinModalSwiper) {
+            // 스와이퍼 최초 생성
+            bulletinModalSwiper = new Swiper('#bulletin-modal-swiper', {
+                initialSlide: startIndex, // 터치한 페이지 번호부터 시작
+                zoom: { maxRatio: 4 },
+                pagination: { el: '#bulletin-modal-swiper .swiper-pagination', clickable: true },
+                navigation: { nextEl: '#bulletin-modal-swiper .swiper-button-next', prevEl: '#bulletin-modal-swiper .swiper-button-prev' },
+                observer: true, observeParents: true
+            });
+        } else {
+            // 이미 생성되어 있다면 터치한 페이지로 바로 이동
+            bulletinModalSwiper.slideTo(startIndex, 0);
+            bulletinModalSwiper.zoom.out();
+            bulletinModalSwiper.update();
+        }
+    }
+
+    function closeBulletinModal() {
+        document.getElementById('bulletin-modal').style.display = 'none';
+        if (bulletinModalSwiper) bulletinModalSwiper.zoom.out();
+    }
+
+    // --- 3. 일정표 줌 기능 (모달) 로직 ---
     let modalSwiper; 
 
     function openZoom(imageSrc) {
@@ -191,12 +250,10 @@
         
         if (!modalSwiper) {
             modalSwiper = new Swiper('#modal-swiper', {
-                zoom: { maxRatio: 5 },
-                observer: true, observeParents: true
+                zoom: { maxRatio: 5 }, observer: true, observeParents: true
             });
         } else {
-            modalSwiper.zoom.out(); 
-            modalSwiper.update();
+            modalSwiper.zoom.out(); modalSwiper.update();
         }
     }
 
@@ -205,7 +262,7 @@
         if (modalSwiper) modalSwiper.zoom.out();
     }
 
-    // --- 3. 드롭다운(아코디언) 메뉴 동작 ---
+    // --- 4. 드롭다운(아코디언) 메뉴 동작 ---
     const dropdownHeader = document.querySelector(".dropdown-header");
     dropdownHeader.addEventListener("click", function() {
         this.classList.toggle("active");
@@ -214,7 +271,7 @@
         else { panel.style.maxHeight = panel.scrollHeight + "px"; }
     });
 
-    // --- 4. 스프레드시트 사업장 연동 ---
+    // --- 5. 스프레드시트 사업장 연동 ---
     const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQAP619mjGoRocR22-JnKQMxDng3n5S6Z5ShfeM89YRjE-gHJe-ubckYrpJjbSHq81sYM_E3CXeSYCC/pub?gid=0&single=true&output=csv";
     fetch(sheetUrl).then(res => res.text()).then(csvText => {
         const getVal = (keyword) => {
