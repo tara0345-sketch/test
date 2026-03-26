@@ -10,7 +10,7 @@
         .header { text-align: center; padding: 15px; background: white; font-weight: bold; color: #1A365D; border-bottom: 1px solid #E5D9C5; }
         
         /* 주보 영역 */
-        .swiper-container { width: 100%; height: 75vh; background: #F5EFE1; position: relative; opacity: 0; transition: opacity 0.5s; }
+        .swiper-container { width: 100%; height: 75vh; background: #F5EFE1; position: relative; opacity: 0; transition: opacity 0.3s; }
         .swiper-container.loaded { opacity: 1; }
         .swiper-zoom-container { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }
         .swiper-slide img { max-width: 95%; max-height: 95%; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 4px; background: white; }
@@ -60,60 +60,56 @@
 
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 <script>
-    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQAP619mjGoRocR22-JnKQMxDng3n5S6Z5ShfeM89YRjE-gHJe-ubckYrpJjbSHq81sYM_E3CXeSYCC/pub?gid=0&single=true&output=csv";
+    const img = new Image();
+    // 1. 깃허브에 올라갈 파일 이름 (정확히 일치해야 합니다)
+    img.src = "jubo.jpg"; 
 
-    fetch(sheetUrl).then(res => res.text()).then(csvText => {
-        const match = csvText.match(/(https?:\/\/[^\s,"']+)/);
-        if (match) cutAndShow(match[1]);
-    });
+    img.onload = async function() {
+        const cols = 4; const rows = 2;
+        const pW = img.width / cols; const pH = img.height / rows;
+        
+        // 2. 화질 최대치 설정 (3배 고화질 렌더링)
+        const scale = 3; 
 
-    async function cutAndShow(url) {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.src = url + "?t=" + new Date().getTime();
+        const order = [
+            { r: 0, c: 3 }, { r: 1, c: 0 }, { r: 1, c: 1 }, { r: 1, c: 2 },
+            { r: 1, c: 3 }, { r: 0, c: 0 }, { r: 0, c: 1 }, { r: 0, c: 2 }
+        ];
 
-        img.onload = async function() {
-            const cols = 4; const rows = 2;
-            const pW = img.width / cols; const pH = img.height / rows;
-            const scale = 1.5; // 화질과 속도의 타협점 (1.5~2 권장)
+        const wrapper = document.getElementById('bulletin-slides');
 
-            const order = [
-                { r: 0, c: 3 }, { r: 1, c: 0 }, { r: 1, c: 1 }, { r: 1, c: 2 },
-                { r: 1, c: 3 }, { r: 0, c: 0 }, { r: 0, c: 1 }, { r: 0, c: 2 }
-            ];
-
-            const wrapper = document.getElementById('bulletin-slides');
-
-            // 병렬 처리를 통해 속도 향상
-            const promises = order.map(pos => {
-                return new Promise(resolve => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = pW * scale; canvas.height = pH * scale;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, pos.c * pW, pos.r * pH, pW, pH, 0, 0, pW * scale, pH * scale);
-                    
-                    // blob 방식이 toDataURL보다 훨씬 빠름
-                    canvas.toBlob(blob => {
-                        const blobUrl = URL.createObjectURL(blob);
-                        const slide = `<div class="swiper-slide"><div class="swiper-zoom-container"><img src="${blobUrl}"></div></div>`;
-                        resolve(slide);
-                    }, 'image/jpeg', 0.85);
-                });
+        const promises = order.map(pos => {
+            return new Promise(resolve => {
+                const canvas = document.createElement('canvas');
+                canvas.width = pW * scale; canvas.height = pH * scale;
+                const ctx = canvas.getContext('2d');
+                
+                // 선명도 강제 옵션
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                
+                ctx.drawImage(img, pos.c * pW, pos.r * pH, pW, pH, 0, 0, pW * scale, pH * scale);
+                
+                // 화질 손실 없는 100% 품질(1.0)로 저장
+                canvas.toBlob(blob => {
+                    const blobUrl = URL.createObjectURL(blob);
+                    const slide = `<div class="swiper-slide"><div class="swiper-zoom-container"><img src="${blobUrl}"></div></div>`;
+                    resolve(slide);
+                }, 'image/jpeg', 1.0); 
             });
+        });
 
-            const slides = await Promise.all(promises);
-            wrapper.innerHTML = slides.join('');
-            
-            // 완료 후 슬라이더 보이기
-            document.getElementById('main-swiper').classList.add('loaded');
+        const slides = await Promise.all(promises);
+        wrapper.innerHTML = slides.join('');
+        
+        document.getElementById('main-swiper').classList.add('loaded');
 
-            new Swiper('.swiper-container', {
-                zoom: { maxRatio: 3 },
-                pagination: { el: '.swiper-pagination', clickable: true },
-                navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }
-            });
-        };
-    }
+        new Swiper('.swiper-container', {
+            zoom: { maxRatio: 4 }, // 최대 4배 확대 가능
+            pagination: { el: '.swiper-pagination', clickable: true },
+            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }
+        });
+    };
 
     function copyAcc() {
         const num = document.getElementById('acc-num').innerText;
