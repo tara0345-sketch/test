@@ -1,260 +1,153 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>안산교회 모바일 소식지</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
+    <title>안산교회 모바일 소식지</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <style>
+        /* 1. 전체 디자인 테마 */
+        body { background-color: #F9FAFC; margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; color: #333; }
+        .header { text-align: center; padding: 20px 15px; background: white; font-weight: 700; color: #004D7F; border-bottom: 1px solid #E6E8EB; font-size: 20px; letter-spacing: -0.5px; }
+        
+        /* 2. 주보 슬라이드 영역 */
+        .swiper-container { width: 100%; height: 75vh; background: #fff; position: relative; opacity: 0; transition: opacity 0.3s; }
+        .swiper-container.loaded { opacity: 1; }
+        .swiper-zoom-container { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }
+        .swiper-slide img { max-width: 95%; max-height: 95%; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 6px; background: white; }
+        
+        /* 3. 하단 섹션 디자인 */
+        .section { padding: 30px 20px; background: white; border-bottom: 8px solid #F9FAFC; }
+        .section-title { font-size: 19px; font-weight: 700; color: #004D7F; margin-bottom: 20px; display: flex; align-items: center; letter-spacing: -0.5px; }
+        .section-title::before { content: "🕊️"; margin-right: 10px; font-size: 20px; }
+        
+        /* 4. 버튼 디자인 통일 */
+        .btn { display: block; width: 100%; padding: 18px; margin: 15px 0; color: white; text-align: center; text-decoration: none; border-radius: 10px; font-weight: 700; box-sizing: border-box; cursor: pointer; border: none; font-size: 17px; transition: 0.2s; -webkit-tap-highlight-color: transparent; }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-outline { background: transparent; color: #004D7F; border: 2px solid #004D7F; margin-top: 10px; }
 
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
-
-<style>
-body {
-    background:#F4F6F9;
-    margin:0;
-    font-family:'Noto Sans KR',sans-serif;
-    color:#333;
-}
-
-/* 헤더 */
-.header {
-    text-align:center;
-    padding:20px;
-    background:white;
-    border-bottom:1px solid #eee;
-    font-weight:700;
-    color:#004D7F;
-}
-.header span {
-    display:block;
-    font-size:13px;
-    color:#888;
-    font-weight:400;
-}
-
-/* 카드형 섹션 */
-.section {
-    background:white;
-    margin:15px;
-    padding:20px;
-    border-radius:16px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.05);
-}
-
-/* 제목 */
-.section-title {
-    font-size:18px;
-    font-weight:700;
-    color:#004D7F;
-    margin-bottom:15px;
-}
-
-/* 버튼 */
-.btn {
-    display:block;
-    width:100%;
-    padding:16px;
-    margin-top:10px;
-    border-radius:10px;
-    border:none;
-    font-weight:700;
-    font-size:16px;
-    cursor:pointer;
-}
-
-.btn-primary {
-    background:#004D7F;
-    color:white;
-}
-
-.btn-outline {
-    background:white;
-    border:2px solid #004D7F;
-    color:#004D7F;
-}
-
-/* Swiper */
-.swiper-container {
-    width:100%;
-    height:70vh;
-    opacity:0;
-    transition:0.3s;
-}
-.swiper-container.loaded { opacity:1; }
-
-.swiper-slide img {
-    max-width:95%;
-    max-height:95%;
-    border-radius:10px;
-}
-
-/* 페이지 표시 */
-.page-indicator {
-    position:absolute;
-    top:10px;
-    right:15px;
-    background:rgba(0,0,0,0.6);
-    color:white;
-    padding:5px 10px;
-    border-radius:20px;
-    font-size:12px;
-}
-
-/* 로딩 */
-#loading {
-    text-align:center;
-    padding-top:40vh;
-    color:#888;
-}
-
-/* 사업장 */
-.business-card {
-    font-size:14px;
-    line-height:1.6;
-}
-
-/* 드롭다운 */
-.dropdown-header {
-    padding:14px;
-    background:#004D7F;
-    color:white;
-    border-radius:10px;
-    cursor:pointer;
-}
-.panel {
-    max-height:0;
-    overflow:hidden;
-    transition:0.3s;
-}
-.panel a {
-    display:block;
-    padding:12px;
-    border-bottom:1px solid #eee;
-    color:#444;
-    text-decoration:none;
-}
-</style>
+        /* 5. 드롭다운(아코디언) 디자인 - 네이비 통일 */
+        .dropdown-wrapper { margin-top: 10px; border-radius: 10px; overflow: hidden; background-color: #fcfcfc; box-shadow: 0 4px 10px rgba(0,77,127,0.15); }
+        .dropdown-header { padding: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; color: white; background: #004D7F; font-weight: 700; font-size: 17px; }
+        .dropdown-header::after { content: '▼'; font-size: 12px; transition: 0.3s; color: rgba(255,255,255,0.7); }
+        .dropdown-header.active::after { transform: rotate(-180deg); color: white; }
+        
+        .panel { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background-color: #fff; border-left: 1px solid #E6E8EB; border-right: 1px solid #E6E8EB; border-bottom: 1px solid #E6E8EB; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; box-sizing: border-box; }
+        .panel a { display: block; padding: 18px; color: #555; text-decoration: none; border-bottom: 1px solid #E6E8EB; font-size: 15px; transition: 0.2s; }
+        .panel a:last-child { border-bottom: none; }
+        .panel a:active { background-color: #F9FAFC; color: #004D7F; font-weight: 500; }
+        
+        /* 6. 사업장 소개 디자인 */
+        .business-card { background: #fff; border: 1px solid #E6E8EB; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .business-card h3 { margin: 0 0 12px 0; color: #004D7F; font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+        .business-card p { margin: 0; font-size: 14px; color: #666; line-height: 1.6; font-weight: 300; }
+    </style>
 </head>
-
 <body>
 
-<div class="header">
-안산교회 모바일 소식지
-<span id="today"></span>
-</div>
-
-<div id="loading">📖 주보를 불러오는 중입니다...</div>
+<div class="header">안산교회 모바일 소식지</div>
 
 <div class="swiper-container" id="main-swiper">
-<div class="page-indicator" id="page">1 / 1</div>
-<div class="swiper-wrapper" id="slides"></div>
-<div class="swiper-pagination"></div>
+    <div class="swiper-wrapper" id="bulletin-slides"></div>
+    <div class="swiper-pagination"></div>
+    <div class="swiper-button-next"></div>
+    <div class="swiper-button-prev"></div>
 </div>
 
-<!-- 핵심 공지 -->
 <div class="section">
-<div class="section-title">📢 이번 주 핵심 공지</div>
-<div>
-- 주일 예배 후 전체 모임 있습니다<br>
-- 차량 신청은 토요일까지 부탁드립니다
-</div>
+    <div class="section-title">소식 및 바로가기</div>
+    
+    <div class="dropdown-wrapper">
+        <div class="dropdown-header">안산교회 유튜브 링크모음</div>
+        <div class="panel">
+            <a href="https://www.youtube.com/playlist?list=PLADscL7WFTv7Fzcn9hYcIldyjm-HLGSkb" target="_blank">📺 1. 안산교회 말씀 다시듣기</a>
+            <a href="https://www.youtube.com/@%EC%83%9D%EB%AA%85%EC%9D%98%EB%A7%90%EC%94%80%EC%84%A0%EA%B5%90%ED%9A%8C%EC%95%88%EC%82%B0" target="_blank">🎥 2. 안산교회 유튜브 채널</a>
+            <a href="https://ansan.jbch.org/index.php?flag=1&chId=89" target="_blank">🌐 3. 안산교회 홈페이지</a>
+            <a href="https://www.jbch.org/ko/" target="_blank">🌐 4. 생명의 말씀 선교회</a>
+        </div>
+    </div>
+    
+    <button class="btn btn-outline" onclick="openEzApp()">Ez성도주소록 앱 열기 📱</button>
 </div>
 
-<!-- 안내 -->
-<div style="text-align:center; font-size:12px; color:#999;">
-🔍 두 손가락으로 확대할 수 있습니다
-</div>
-
-<!-- 링크 -->
 <div class="section">
-<div class="section-title">🔗 바로가기</div>
-
-<div class="dropdown-header">유튜브 & 사이트</div>
-<div class="panel">
-<a href="https://www.youtube.com/" target="_blank">📺 말씀 다시보기</a>
-<a href="https://www.youtube.com/" target="_blank">🎥 교회 채널</a>
-<a href="#">🌐 교회 홈페이지</a>
+    <div class="section-title">성도 사업장 소개</div>
+    <div class="business-card">
+        <h3>🏢 만나 식당 (홍길동 성도님)</h3>
+        <p>정성을 다해 만든 따뜻한 국밥 한 그릇 드시러 오세요! 안산교회 성도님들께는 음료수를 서비스로 드립니다.</p>
+        <p style="margin-top: 15px; font-size: 13px; color: #999; font-weight: 300;">📍 위치: 안산시 상록구 OO로 123<br>📞 문의: 010-1234-5678</p>
+    </div>
 </div>
 
-<button class="btn btn-outline">📱 성도주소록 앱</button>
-</div>
-
-<!-- 사업장 -->
-<div class="section">
-<div class="section-title">🏢 성도 사업장</div>
-<div class="business-card">
-<b>만나 식당</b><br>
-따뜻한 국밥 드시러 오세요 😊<br><br>
-
-📍 안산시 상록구 OO로 123<br>
-<a href="tel:01012345678">📞 전화하기</a>
-</div>
+<div class="section" style="padding-bottom: 50px; text-align: center; color: #bbb; font-size: 12px; border-bottom: none; font-weight: 300;">
+    ⓒ 안산교회. 모든 성도님을 사랑하고 축복합니다.
 </div>
 
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-
 <script>
-// 날짜 자동 표시
-const d = new Date();
-document.getElementById("today").innerText =
-`${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
+    const img = new Image();
+    img.src = "jubo.jpg"; 
 
-// 드롭다운
-document.querySelector(".dropdown-header").onclick = function(){
-    const p = this.nextElementSibling;
-    p.style.maxHeight = p.style.maxHeight ? null : p.scrollHeight+"px";
-};
+    img.onload = async function() {
+        const cols = 4; const rows = 2;
+        const pW = img.width / cols; const pH = img.height / rows;
+        const scale = 3; 
 
-// 이미지 처리
-const img = new Image();
-img.src = "jubo.jpg";
+        const order = [
+            { r: 0, c: 3 }, { r: 1, c: 0 }, { r: 1, c: 1 }, { r: 1, c: 2 },
+            { r: 1, c: 3 }, { r: 0, c: 0 }, { r: 0, c: 1 }, { r: 0, c: 2 }
+        ];
 
-img.onload = async function(){
-    const cols=4, rows=2;
-    const w=img.width/cols, h=img.height/rows;
-    const scale=3;
+        const wrapper = document.getElementById('bulletin-slides');
 
-    const wrapper=document.getElementById("slides");
+        const promises = order.map(pos => {
+            return new Promise(resolve => {
+                const canvas = document.createElement('canvas');
+                canvas.width = pW * scale; canvas.height = pH * scale;
+                const ctx = canvas.getContext('2d');
+                
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                
+                ctx.drawImage(img, pos.c * pW, pos.r * pH, pW, pH, 0, 0, pW * scale, pH * scale);
+                
+                canvas.toBlob(blob => {
+                    const blobUrl = URL.createObjectURL(blob);
+                    const slide = `<div class="swiper-slide"><div class="swiper-zoom-container"><img src="${blobUrl}"></div></div>`;
+                    resolve(slide);
+                }, 'image/jpeg', 1.0); 
+            });
+        });
 
-    let slides=[];
+        const slides = await Promise.all(promises);
+        wrapper.innerHTML = slides.join('');
+        
+        document.getElementById('main-swiper').classList.add('loaded');
 
-    for(let r=0;r<rows;r++){
-        for(let c=0;c<cols;c++){
-            const canvas=document.createElement("canvas");
-            canvas.width=w*scale;
-            canvas.height=h*scale;
-            const ctx=canvas.getContext("2d");
+        new Swiper('.swiper-container', {
+            zoom: { maxRatio: 4 }, 
+            pagination: { el: '.swiper-pagination', clickable: true },
+            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }
+        });
+    };
 
-            ctx.drawImage(img,c*w,r*h,w,h,0,0,w*scale,h*scale);
-
-            const url=canvas.toDataURL();
-
-            slides.push(`<div class="swiper-slide">
-            <img src="${url}">
-            </div>`);
-        }
-    }
-
-    wrapper.innerHTML=slides.join("");
-
-    document.getElementById("loading").style.display="none";
-    document.getElementById("main-swiper").classList.add("loaded");
-
-    const swiper=new Swiper('.swiper-container',{
-        zoom:true,
-        pagination:{el:'.swiper-pagination'},
-        on:{
-            slideChange:function(){
-                document.getElementById("page").innerText =
-                (this.activeIndex+1)+" / "+this.slides.length;
-            }
+    // 드롭다운(아코디언) 메뉴 동작 로직
+    const dropdownHeader = document.querySelector(".dropdown-header");
+    dropdownHeader.addEventListener("click", function() {
+        this.classList.toggle("active");
+        const panel = this.nextElementSibling;
+        if (panel.style.maxHeight) {
+            panel.style.maxHeight = null;
+        } else {
+            panel.style.maxHeight = panel.scrollHeight + "px";
         }
     });
 
-    document.getElementById("page").innerText =
-    "1 / "+swiper.slides.length;
-};
+    // Ez성도주소록 앱 열기 로직
+    function openEzApp() {
+        alert("현재 준비 중인 기능입니다.\n앱 고유 주소가 확인되면 바로 앱이 열리도록 연동됩니다!");
+    }
 </script>
-
 </body>
 </html>
