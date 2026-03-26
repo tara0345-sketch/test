@@ -6,7 +6,7 @@
     <title>안산교회 모바일 소식지</title>
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
     <style>
-        body { background-color: #FDF9F1; margin: 0; padding: 0; font-family: sans-serif; color: #333; }
+        body { background-color: #FDF9F1; margin: 0; padding: 0; font-family: 'Malgun Gothic', sans-serif; color: #333; }
         .header { text-align: center; padding: 15px; background: white; font-weight: bold; color: #1A365D; border-bottom: 1px solid #E5D9C5; }
         
         /* 주보 영역 */
@@ -20,12 +20,23 @@
         .section-title { font-size: 19px; font-weight: bold; color: #1A365D; margin-bottom: 15px; display: flex; align-items: center; }
         .section-title::before { content: "🕊️"; margin-right: 8px; }
         
-        .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; background: #1A365D; color: white; text-align: center; text-decoration: none; border-radius: 8px; font-weight: bold; box-sizing: border-box; }
-        .btn-red { background: #FF0000; }
+        /* 버튼 스타일 */
+        .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; color: white; text-align: center; text-decoration: none; border-radius: 8px; font-weight: bold; box-sizing: border-box; cursor: pointer; border: none; font-size: 16px; }
         .btn-green { background: #4CAF50; }
+        .btn-blue { background: #007AFF; }
         
-        .account-box { background: #f9f9f9; border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; }
-        .account-num { font-size: 18px; font-weight: bold; margin: 10px 0; display: block; }
+        /* 드롭다운(아코디언) 스타일 */
+        .accordion-btn { background: #FF0000; display: flex; justify-content: space-between; align-items: center; }
+        .accordion-btn::after { content: '▼'; font-size: 14px; transition: 0.3s; }
+        .accordion-btn.active::after { transform: rotate(-180deg); }
+        .panel { background-color: #f9f9f9; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; border-radius: 8px; margin-top: -5px; margin-bottom: 10px; border: 1px solid #eee; border-top: none; }
+        .panel a { display: block; padding: 15px; color: #333; text-decoration: none; border-bottom: 1px solid #ddd; font-size: 15px; }
+        .panel a:last-child { border-bottom: none; }
+        
+        /* 사업장 소개 스타일 */
+        .business-card { background: #fff; border: 2px solid #E5D9C5; padding: 15px; border-radius: 8px; }
+        .business-card h3 { margin: 0 0 10px 0; color: #1A365D; font-size: 18px; }
+        .business-card p { margin: 0; font-size: 14px; color: #555; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -40,35 +51,43 @@
 </div>
 
 <div class="section">
-    <div class="section-title">온라인 헌금 안내</div>
-    <div class="account-box">
-        <span class="account-num" id="acc-num">농협 123-4567-8901-23</span>
-        <small>예금주: 안산교회</small>
-        <button class="btn" style="padding:10px; font-size:14px;" onclick="copyAcc()">계좌번호 복사하기</button>
+    <div class="section-title">안산교회 바로가기</div>
+    
+    <button class="btn accordion-btn">안산교회 링크 모음</button>
+    <div class="panel">
+        <a href="https://www.youtube.com/playlist?list=PLADscL7WFTv7Fzcn9hYcIldyjm-HLGSkb" target="_blank">📺 1. 안산교회 말씀 다시듣기</a>
+        <a href="https://www.youtube.com/@%EC%83%9D%EB%AA%85%EC%9D%98%EB%A7%90%EC%94%80%EC%84%A0%EA%B5%90%ED%9A%8C%EC%95%88%EC%82%B0/featured" target="_blank">🎥 2. 안산교회 유튜브 채널</a>
+        <a href="https://ansan.jbch.org/fellowship/news/list.php?flag=1&chId=89&abtype=&boardId=13976&gCode=11188" target="_blank">🔔 3. 안산교회 띵동</a>
+        <a href="https://ansan.jbch.org/index.php?flag=1&chId=89" target="_blank">🌐 4. 안산교회 홈페이지</a>
     </div>
-</div>
 
-<div class="section">
-    <div class="section-title">예배 및 기도</div>
-    <a href="#" class="btn btn-red">유튜브 설교 다시보기 ▶</a>
+    <button class="btn btn-blue" onclick="openEzApp()">Ez성도주소록 앱 열기 📱</button>
+    
     <a href="#" class="btn btn-green">기도 제목 및 전도 부탁 남기기 📝</a>
 </div>
 
-<div class="section" style="padding-bottom: 50px; text-align: center; color: #888; font-size: 12px;">
+<div class="section">
+    <div class="section-title">성도 사업장 소개</div>
+    <div class="business-card">
+        <h3>🏢 만나 식당 (홍길동 성도님)</h3>
+        <p>정성을 다해 만든 따뜻한 국밥 한 그릇 드시러 오세요! 안산교회 성도님들께는 음료수를 서비스로 드립니다.</p>
+        <p style="margin-top: 10px; font-size: 13px; color: #888;">📍 위치: 안산시 상록구 OO로 123<br>📞 문의: 010-1234-5678</p>
+    </div>
+</div>
+
+<div class="section" style="padding-bottom: 50px; text-align: center; color: #888; font-size: 12px; border-bottom: none;">
     ⓒ 안산교회. 모든 성도님을 사랑하고 축복합니다.
 </div>
 
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 <script>
+    // 주보 자르기 및 스와이퍼 로직 (초고화질 유지)
     const img = new Image();
-    // 1. 깃허브에 올라갈 파일 이름 (정확히 일치해야 합니다)
     img.src = "jubo.jpg"; 
 
     img.onload = async function() {
         const cols = 4; const rows = 2;
         const pW = img.width / cols; const pH = img.height / rows;
-        
-        // 2. 화질 최대치 설정 (3배 고화질 렌더링)
         const scale = 3; 
 
         const order = [
@@ -84,13 +103,11 @@
                 canvas.width = pW * scale; canvas.height = pH * scale;
                 const ctx = canvas.getContext('2d');
                 
-                // 선명도 강제 옵션
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = 'high';
                 
                 ctx.drawImage(img, pos.c * pW, pos.r * pH, pW, pH, 0, 0, pW * scale, pH * scale);
                 
-                // 화질 손실 없는 100% 품질(1.0)로 저장
                 canvas.toBlob(blob => {
                     const blobUrl = URL.createObjectURL(blob);
                     const slide = `<div class="swiper-slide"><div class="swiper-zoom-container"><img src="${blobUrl}"></div></div>`;
@@ -105,15 +122,30 @@
         document.getElementById('main-swiper').classList.add('loaded');
 
         new Swiper('.swiper-container', {
-            zoom: { maxRatio: 4 }, // 최대 4배 확대 가능
+            zoom: { maxRatio: 4 }, 
             pagination: { el: '.swiper-pagination', clickable: true },
             navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }
         });
     };
 
-    function copyAcc() {
-        const num = document.getElementById('acc-num').innerText;
-        navigator.clipboard.writeText(num).then(() => alert("계좌번호가 복사되었습니다."));
+    // 드롭다운(아코디언) 메뉴 동작 로직
+    const accBtn = document.querySelector(".accordion-btn");
+    accBtn.addEventListener("click", function() {
+        this.classList.toggle("active");
+        const panel = this.nextElementSibling;
+        if (panel.style.maxHeight) {
+            panel.style.maxHeight = null;
+        } else {
+            panel.style.maxHeight = panel.scrollHeight + "px";
+        }
+    });
+
+    // Ez성도주소록 앱 열기 로직
+    function openEzApp() {
+        // [수정 포인트] 나중에 앱의 고유 URL 스킴을 알게 되면 아래 주석을 풀고 주소를 넣으세요.
+        // window.location.href = "ezaddress://"; 
+        
+        alert("현재 준비 중인 기능입니다.\n앱 고유 주소가 확인되면 바로 앱이 열리도록 연동됩니다!");
     }
 </script>
 </body>
