@@ -11,10 +11,20 @@
         #opening-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: black; z-index: 10000; 
-            display: flex; justify-content: center; align-items: center;
-            overflow: hidden; transition: opacity 0.5s ease; 
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            overflow: hidden; transition: opacity 0.5s ease; cursor: pointer; /* 클릭 가능한 커서 */
         }
         #opening-video { width: 100%; height: 100%; object-fit: cover; background: black; }
+        
+        /* 💡 [핵심 추가] 스킵 안내 문구 디자인 */
+        .skip-hint {
+            position: absolute; bottom: 40px; color: rgba(255, 255, 255, 0.7);
+            font-size: 14px; font-weight: 300; z-index: 10001;
+            pointer-events: none; /* 클릭 방해 안 함 */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
         /* [메인 콘텐츠 스타일] */
         #main-content { display: none; opacity: 0; transition: opacity 0.5s ease; }
@@ -57,10 +67,10 @@
         .schedule-col:first-child { border-right: 1px solid #E6E8EB; }
         .schedule-col:active { background: #f0f4f8; }
         .schedule-label { font-weight: 700; color: #004D7F; margin-bottom: 10px; font-size: 15px; }
-        .schedule-img-thumb { width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: block; }
+        .schedule-img-thumb { width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: block; image-rendering: -webkit-optimize-contrast; transform: translateZ(0); backface-visibility: hidden; }
         .schedule-hint { font-size: 12px; color: #888; text-align: center; margin-top: 10px; display: flex; justify-content: center; align-items: center; }
         
-        /* 6. 전체화면 팝업(모달) - 이제 주보 전용으로만 사용됨 */
+        /* 6. 전체화면 팝업(모달) */
         #bulletin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; justify-content: center; }
         .close-btn { position: absolute; top: 15px; right: 20px; color: white; font-size: 30px; font-weight: bold; cursor: pointer; z-index: 10000; padding: 10px; }
         .modal-nav { color: white !important; }
@@ -86,8 +96,8 @@
 <div id="opening-container">
     <video id="opening-video" autoplay muted playsinline preload="auto">
         <source src="jubo_opening.mp4" type="video/mp4">
-        웹브라우저가 영상을 지원하지 않습니다.
     </video>
+    <div class="skip-hint">화면을 터치하면 스킵됩니다 ⏭️</div>
 </div>
 
 <div id="main-content">
@@ -171,22 +181,35 @@
     const video = document.getElementById('opening-video');
     const container = document.getElementById('opening-container');
     const mainContent = document.getElementById('main-content');
-
-    video.onended = function() {
+    
+    // 💡 [핵심 추가] 영상을 끝내고 주보로 넘어가는 '공통 함수'
+    function finishOpening() {
+        // 이미 투명해지고 있다면 중복 실행 방지
+        if (container.style.opacity === '0') return;
+        
         container.style.opacity = '0';
         setTimeout(function() {
             container.style.display = 'none';
             mainContent.classList.add('show');
             loadJubo(); 
             initScrollAnimation();
-        }, 500); 
+        }, 500);
+    }
+
+    // 1. 영상이 자연스럽게 끝났을 때
+    video.onended = finishOpening;
+
+    // 2. 에러가 났을 때
+    video.onerror = finishOpening;
+
+    // 3. 10초가 지났을 때 (비상용)
+    let fallbackTimer = setTimeout(finishOpening, 10000); 
+
+    // 4. 💡 성도님이 화면을 터치(클릭)했을 때 즉시 스킵!
+    container.onclick = function() {
+        finishOpening();
     };
 
-    let fallbackTimer = setTimeout(function() {
-        if (container.style.display !== 'none') { video.onended(); }
-    }, 10000); 
-
-    video.onerror = function() { video.onended(); };
 
     let bulletinImages = []; 
 
