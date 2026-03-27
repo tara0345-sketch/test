@@ -7,29 +7,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
     <style>
-        /* [핵심] 오프닝 영상 스타일 */
+        /* [오프닝 영상 스타일] */
         #opening-container {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
-            background: black; /* 영상 로딩 전 검은 배경 */
-            z-index: 10000; /* 최상위에 배치 */
+            background: black; 
+            z-index: 10000; 
             display: flex; justify-content: center; align-items: center;
             overflow: hidden;
-            transition: opacity 0.5s ease; /* 끝날 때 부드럽게 페이드 아웃 */
+            transition: opacity 0.5s ease; 
         }
         #opening-video {
             width: 100%; height: 100%;
-            object-fit: cover; /* 화면 꽉 차게 가위질 & 가운데 정렬 */
+            object-fit: cover; 
             background: black;
         }
 
-        /* [핵심] 메인 콘텐츠 스타일 (처음엔 숨김) */
+        /* [메인 콘텐츠 스타일 - 처음엔 숨김] */
         #main-content {
-            display: none; /* 오프닝 전에는 아예 공간을 차지하지 않게 */
+            display: none; 
             opacity: 0;
             transition: opacity 0.5s ease;
         }
-        #main-content.show { display: block; opacity: 1; } /* 오프닝 후 부드럽게 나타남 */
+        #main-content.show { display: block; opacity: 1; }
 
         /* 1. 전체 디자인 테마 */
         body { background-color: #F9FAFC; margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; color: #333; }
@@ -40,7 +40,7 @@
         .spinner { margin: 0 auto 15px; width: 40px; height: 40px; border: 4px solid rgba(0, 77, 127, 0.1); border-top: 4px solid #004D7F; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 3. 주보 슬라이드 영역 (처음엔 숨김 + 기준점 고정) */
+        /* 3. 메인 주보 슬라이드 영역 */
         .swiper-container { position: relative; width: 100%; height: 75vh; background: #fff; display: none; padding-bottom: 25px; box-sizing: border-box; }
         .swiper-container.loaded { display: block; animation: fadeIn 0.6s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -106,12 +106,15 @@
         주보를 불러오는 중입니다...<br><span style="font-size: 13px; color: #888; font-weight: 300;">잠시만 기다려 주세요 ⏳</span>
     </div>
 
+    <div id="bulletin-hint" style="display: none; text-align: center; padding: 20px 15px 5px; background: white; font-weight: 700; color: #004D7F; font-size: 15px;">
+        👆 이미지를 터치하시면 전체화면으로 볼 수 있습니다.
+    </div>
+
     <div class="swiper-container" id="main-swiper">
         <div class="swiper-wrapper" id="bulletin-slides"></div>
         <div class="swiper-pagination"></div>
         <div class="swiper-button-next"></div>
         <div class="swiper-button-prev"></div>
-        <div class="schedule-hint" style="position:absolute; bottom:30px; width:100%; z-index:10;">👆 주보를 터치하면 전체화면으로 볼 수 있습니다.</div>
     </div>
 
     <div class="section">
@@ -138,12 +141,11 @@
     <div class="section">
         <div class="section-title">소식 및 바로가기</div>
         <div class="dropdown-wrapper">
-            <div class="dropdown-header">안산교회 유튜브 링크모음</div>
+            <div class="dropdown-header">안산교회 링크 모음</div>
             <div class="panel">
-                <a href="https://www.youtube.com/playlist?list=PLADscL7WFTv7Fzcn9hYcIldyjm-HLGSkb" target="_blank">📺 1. 안산교회 말씀 다시듣기</a>
-                <a href="https://www.youtube.com/@%EC%83%9D%EB%AA%85%EC%9D%98%EB%A7%90%EC%94%80%EC%84%A0%EA%B5%90%ED%9A%8C%EC%95%88%EC%82%B0" target="_blank">🎥 2. 안산교회 유튜브 채널</a>
-                <a href="https://ansan.jbch.org/index.php?flag=1&chId=89" target="_blank">🌐 3. 안산교회 홈페이지</a>
-                <a href="https://www.jbch.org/ko/" target="_blank">🌐 4. 생명의 말씀 선교회</a>
+                <a href="https://www.youtube.com/@%EC%83%9D%EB%AA%85%EC%9D%98%EB%A7%90%EC%94%80%EC%84%A0%EA%B5%90%ED%9A%8C%EC%95%88%EC%82%B0" target="_blank">🎥 1. 안산교회 유튜브 채널</a>
+                <a href="https://ansan.jbch.org/index.php?flag=1&chId=89" target="_blank">🌐 2. 안산교회 홈페이지</a>
+                <a href="https://www.jbch.org/ko/" target="_blank">🌐 3. 생명의 말씀 선교회</a>
             </div>
         </div>
     </div>
@@ -186,35 +188,35 @@
 
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 <script>
-    // --- 💡 [핵심 추가] 오프닝 영상 처리 로직 ---
+    // --- 🎬 영상 처리 및 10초 강제 종료 수정 완료 ---
     const video = document.getElementById('opening-video');
     const container = document.getElementById('opening-container');
     const mainContent = document.getElementById('main-content');
 
-    // 영상 재생이 끝났을 때의 행동
+    // 영상 재생이 정상적으로 끝나면 주보로 넘어감
     video.onended = function() {
-        // 오프닝 컨테이너를 부드럽게 페이드 아웃 시킴
         container.style.opacity = '0';
-        
-        // 0.5초 뒤에 오프닝 컨테이너를 아예 없애고, 메인 콘텐츠를 보여줌
         setTimeout(function() {
-            container.style.display = 'none'; // 오프닝 컨테이너 제거
-            mainContent.classList.add('show'); // 메인 콘텐츠 보이기
-            
-            // [핵심 유지] 메인 콘텐츠가 나타난 뒤에 기존 주보 로딩 로직을 실행
+            container.style.display = 'none';
+            mainContent.classList.add('show');
             loadJubo(); 
         }, 500); 
     };
 
-    // 혹시라도 영상 로딩이 실패할 경우를 대비해, 2초 뒤에는 강제로 오프닝을 끄고 메인으로 넘김
-    setTimeout(function() {
+    // 비상용 타이머: 영상 오류를 대비해 10초 뒤에는 무조건 주보 화면 띄우기 (1초 잘림 현상 해결!)
+    let fallbackTimer = setTimeout(function() {
         if (container.style.display !== 'none') {
-            video.onended(); // 영상 종료 시와 동일한 로직 실행
+            video.onended(); 
         }
-    }, 2000);
+    }, 10000); 
+
+    // 영상 에러 발생 시 즉시 주보 화면 띄우기
+    video.onerror = function() {
+        video.onended();
+    };
 
 
-    // --- [핵심 유지] 기존 주보 로딩 및 자르기 로직 (함수로 감쌈) ---
+    // --- 주보 로딩 및 스와이퍼 자르기 함수 ---
     function loadJubo() {
         const img = new Image();
         img.src = "jubo.jpg"; 
@@ -243,7 +245,6 @@
                     canvas.toBlob(blob => {
                         const blobUrl = URL.createObjectURL(blob);
                         bulletinImages[index] = blobUrl; 
-                        
                         resolve(`<div class="swiper-slide" onclick="openBulletinModal(${index})"><div class="swiper-zoom-container"><img src="${blobUrl}"></div></div>`);
                     }, 'image/jpeg', 1.0); 
                 });
@@ -252,19 +253,18 @@
             const slides = await Promise.all(promises);
             wrapper.innerHTML = slides.join('');
             
-            // 주보 작업이 다 끝나면 기존 로딩창을 숨김
             document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('bulletin-hint').style.display = 'block'; 
             document.getElementById('main-swiper').classList.add('loaded');
 
             new Swiper('#main-swiper', {
                 pagination: { el: '#main-swiper .swiper-pagination', clickable: true },
-                navigation: { nextEl: '#main-swiper .swiper-button-next', prevEl: '#main-swiper .swiper-button-prev' },
-                observer: true, observeParents: true
+                navigation: { nextEl: '#main-swiper .swiper-button-next', prevEl: '#main-swiper .swiper-button-prev' }
             });
         };
     }
 
-    // --- [핵심 유지] 기존 모달 및 드롭다운, 스프레드시트 로직 ---
+    // --- 모달 창 및 나머지 스크립트 기능 ---
     let bulletinModalSwiper;
     function openBulletinModal(startIndex) {
         const wrapper = document.getElementById('bulletin-modal-wrapper');
@@ -286,6 +286,7 @@
         }
     }
     function closeBulletinModal() { document.getElementById('bulletin-modal').style.display = 'none'; if (bulletinModalSwiper) bulletinModalSwiper.zoom.out(); }
+    
     let modalSwiper; 
     function openZoom(imageSrc) {
         document.getElementById('zoom-image').src = imageSrc; document.getElementById('zoom-modal').style.display = 'flex';
@@ -293,8 +294,10 @@
         else { modalSwiper.zoom.out(); modalSwiper.update(); }
     }
     function closeZoom() { document.getElementById('zoom-modal').style.display = 'none'; if (modalSwiper) modalSwiper.zoom.out(); }
+    
     const dropdownHeader = document.querySelector(".dropdown-header");
     dropdownHeader.addEventListener("click", function() { this.classList.toggle("active"); const panel = this.nextElementSibling; if (panel.style.maxHeight) { panel.style.maxHeight = null; } else { panel.style.maxHeight = panel.scrollHeight + "px"; } });
+    
     const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQAP619mjGoRocR22-JnKQMxDng3n5S6Z5ShfeM89YRjE-gHJe-ubckYrpJjbSHq81sYM_E3CXeSYCC/pub?gid=0&single=true&output=csv";
     fetch(sheetUrl).then(res => res.text()).then(csvText => { const getVal = (keyword) => { const match = csvText.match(new RegExp(`^.*?${keyword}.*?,(.*)$`, 'm')); return match ? match[1].trim().replace(/^"|"$/g, '') : ''; }; document.getElementById('biz-title').innerText = `🏢 ${getVal('상호명')||'만나 식당'} (${getVal('성도명')||'홍길동'})`; document.getElementById('biz-desc').innerText = getVal('소개')||'환영합니다.'; document.getElementById('biz-info').innerHTML = `📍 위치: ${getVal('위치')||'-'}<br>📞 문의: ${getVal('연락처')||'-'}`; }).catch(e => { document.getElementById('biz-title').innerText = "🏢 사업장 안내"; document.getElementById('biz-desc').innerText = "준비 중입니다."; });
 </script>
