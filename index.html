@@ -9,26 +9,15 @@
     <style>
         /* [오프닝 영상 스타일] */
         #opening-container {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: black; 
-            z-index: 10000; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; z-index: 10000; 
             display: flex; justify-content: center; align-items: center;
-            overflow: hidden;
-            transition: opacity 0.5s ease; 
+            overflow: hidden; transition: opacity 0.5s ease; 
         }
-        #opening-video {
-            width: 100%; height: 100%;
-            object-fit: cover; 
-            background: black;
-        }
+        #opening-video { width: 100%; height: 100%; object-fit: cover; background: black; }
 
-        /* [메인 콘텐츠 스타일 - 처음엔 숨김] */
-        #main-content {
-            display: none; 
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
+        /* [메인 콘텐츠 스타일] */
+        #main-content { display: none; opacity: 0; transition: opacity 0.5s ease; }
         #main-content.show { display: block; opacity: 1; }
 
         /* 1. 전체 디자인 테마 */
@@ -57,6 +46,17 @@
         .section-title { font-size: 19px; font-weight: 700; color: #004D7F; margin-bottom: 20px; display: flex; align-items: center; letter-spacing: -0.5px; }
         .section-title::before { content: "🕊️"; margin-right: 10px; font-size: 20px; }
         
+        /* 💡 [핵심 추가] 스크롤 애니메이션 클래스 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px); /* 처음에 아래로 40px 내려가 있음 */
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* 고급스럽고 부드러운 속도 조절 */
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0); /* 원래 위치로 스르륵 복귀 */
+        }
+
         /* 5. 일정표 디자인 */
         .schedule-box { background: #fff; border: 1px solid #E6E8EB; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,77,127,0.05); }
         .schedule-row { display: flex; border-bottom: 1px solid #E6E8EB; }
@@ -67,7 +67,7 @@
         .schedule-img-thumb { width: 100%; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: block; }
         .schedule-hint { font-size: 12px; color: #888; text-align: center; margin-top: 10px; display: flex; justify-content: center; align-items: center; }
         
-        /* 6. 전체화면 팝업(모달) - 주보 & 일정표 공통 */
+        /* 6. 전체화면 팝업(모달) */
         #zoom-modal, #bulletin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; justify-content: center; }
         .close-btn { position: absolute; top: 15px; right: 20px; color: white; font-size: 30px; font-weight: bold; cursor: pointer; z-index: 10000; padding: 10px; }
         
@@ -117,7 +117,7 @@
         <div class="swiper-button-prev"></div>
     </div>
 
-    <div class="section">
+    <div class="section reveal">
         <div class="section-title">교회 일정표</div>
         <div class="schedule-box">
             <div class="schedule-row">
@@ -138,7 +138,7 @@
         <div class="schedule-hint">👆 이미지를 터치하시면 원본으로 확대할 수 있습니다.</div>
     </div>
 
-    <div class="section">
+    <div class="section reveal">
         <div class="section-title">소식 및 바로가기</div>
         <div class="dropdown-wrapper">
             <div class="dropdown-header">안산교회 링크 모음</div>
@@ -150,7 +150,7 @@
         </div>
     </div>
 
-    <div class="section">
+    <div class="section reveal">
         <div class="section-title">성도 사업장 소개</div>
         <div class="business-card" id="business-container">
             <h3 id="biz-title">🏢 데이터를 불러오는 중...</h3>
@@ -159,7 +159,7 @@
         </div>
     </div>
 
-    <div class="section" style="padding-bottom: 50px; text-align: center; color: #bbb; font-size: 12px; border-bottom: none; font-weight: 300;">
+    <div class="section reveal" style="padding-bottom: 50px; text-align: center; color: #bbb; font-size: 12px; border-bottom: none; font-weight: 300;">
         ⓒ 안산교회. 모든 성도님을 사랑하고 축복합니다.
     </div>
 
@@ -199,6 +199,7 @@
             container.style.display = 'none';
             mainContent.classList.add('show');
             loadJubo(); 
+            initScrollAnimation(); // 💡 영상이 끝나고 메인 화면이 켜지면 애니메이션 감지 시작!
         }, 500); 
     };
 
@@ -212,7 +213,6 @@
         video.onended();
     };
 
-    // 💡 [핵심 수정] 주보 이미지를 담을 배열을 '함수 밖(전역)'으로 꺼냈습니다!
     let bulletinImages = []; 
 
     // --- 주보 로딩 및 스와이퍼 자르기 함수 ---
@@ -241,7 +241,7 @@
                     
                     canvas.toBlob(blob => {
                         const blobUrl = URL.createObjectURL(blob);
-                        bulletinImages[index] = blobUrl; // 여기서 전역 바구니에 잘 담깁니다.
+                        bulletinImages[index] = blobUrl; 
                         resolve(`<div class="swiper-slide" onclick="openBulletinModal(${index})"><div class="swiper-zoom-container"><img src="${blobUrl}"></div></div>`);
                     }, 'image/jpeg', 1.0); 
                 });
@@ -259,6 +259,24 @@
                 navigation: { nextEl: '#main-swiper .swiper-button-next', prevEl: '#main-swiper .swiper-button-prev' }
             });
         };
+    }
+
+    // --- 💡 [핵심 추가] 스크롤 애니메이션 작동 로직 ---
+    function initScrollAnimation() {
+        // 화면에 요소가 15% 정도 보일 때 'active' 클래스를 붙여서 애니메이션 실행
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    // 한 번 나타난 구역은 계속 보이게 처리
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+
+        // 'reveal' 클래스가 붙은 모든 구역을 감시
+        const revealElements = document.querySelectorAll('.reveal');
+        revealElements.forEach((el) => observer.observe(el));
     }
 
     // --- 모달 창 및 나머지 스크립트 기능 ---
