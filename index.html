@@ -188,12 +188,11 @@
 
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 <script>
-    // --- 🎬 영상 처리 및 10초 강제 종료 수정 완료 ---
+    // --- 🎬 영상 처리 로직 ---
     const video = document.getElementById('opening-video');
     const container = document.getElementById('opening-container');
     const mainContent = document.getElementById('main-content');
 
-    // 영상 재생이 정상적으로 끝나면 주보로 넘어감
     video.onended = function() {
         container.style.opacity = '0';
         setTimeout(function() {
@@ -203,25 +202,23 @@
         }, 500); 
     };
 
-    // 비상용 타이머: 영상 오류를 대비해 10초 뒤에는 무조건 주보 화면 띄우기 (1초 잘림 현상 해결!)
     let fallbackTimer = setTimeout(function() {
         if (container.style.display !== 'none') {
             video.onended(); 
         }
     }, 10000); 
 
-    // 영상 에러 발생 시 즉시 주보 화면 띄우기
     video.onerror = function() {
         video.onended();
     };
 
+    // 💡 [핵심 수정] 주보 이미지를 담을 배열을 '함수 밖(전역)'으로 꺼냈습니다!
+    let bulletinImages = []; 
 
     // --- 주보 로딩 및 스와이퍼 자르기 함수 ---
     function loadJubo() {
         const img = new Image();
         img.src = "jubo.jpg"; 
-        
-        let bulletinImages = []; 
 
         img.onload = async function() {
             const cols = 4; const rows = 2;
@@ -244,7 +241,7 @@
                     
                     canvas.toBlob(blob => {
                         const blobUrl = URL.createObjectURL(blob);
-                        bulletinImages[index] = blobUrl; 
+                        bulletinImages[index] = blobUrl; // 여기서 전역 바구니에 잘 담깁니다.
                         resolve(`<div class="swiper-slide" onclick="openBulletinModal(${index})"><div class="swiper-zoom-container"><img src="${blobUrl}"></div></div>`);
                     }, 'image/jpeg', 1.0); 
                 });
