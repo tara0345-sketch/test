@@ -7,6 +7,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
     <style>
+        /* [핵심] 오프닝 영상 스타일 */
+        #opening-container {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: black; /* 영상 로딩 전 검은 배경 */
+            z-index: 10000; /* 최상위에 배치 */
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+            transition: opacity 0.5s ease; /* 끝날 때 부드럽게 페이드 아웃 */
+        }
+        #opening-video {
+            width: 100%; height: 100%;
+            object-fit: cover; /* 화면 꽉 차게 가위질 & 가운데 정렬 */
+            background: black;
+        }
+
+        /* [핵심] 메인 콘텐츠 스타일 (처음엔 숨김) */
+        #main-content {
+            display: none; /* 오프닝 전에는 아예 공간을 차지하지 않게 */
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        #main-content.show { display: block; opacity: 1; } /* 오프닝 후 부드럽게 나타남 */
+
         /* 1. 전체 디자인 테마 */
         body { background-color: #F9FAFC; margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; color: #333; }
         .header { text-align: center; padding: 20px 15px; background: white; font-weight: 700; color: #004D7F; border-bottom: 1px solid #E6E8EB; font-size: 20px; letter-spacing: -0.5px; }
@@ -16,7 +40,7 @@
         .spinner { margin: 0 auto 15px; width: 40px; height: 40px; border: 4px solid rgba(0, 77, 127, 0.1); border-top: 4px solid #004D7F; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 3. 메인 주보 슬라이드 영역 (처음엔 숨김) */
+        /* 3. 주보 슬라이드 영역 (처음엔 숨김 + 기준점 고정) */
         .swiper-container { position: relative; width: 100%; height: 75vh; background: #fff; display: none; padding-bottom: 25px; box-sizing: border-box; }
         .swiper-container.loaded { display: block; animation: fadeIn 0.6s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -47,7 +71,6 @@
         #zoom-modal, #bulletin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; justify-content: center; }
         .close-btn { position: absolute; top: 15px; right: 20px; color: white; font-size: 30px; font-weight: bold; cursor: pointer; z-index: 10000; padding: 10px; }
         
-        /* 모달 안에서는 버튼과 점이 하얀색이어야 잘 보입니다 */
         .modal-nav { color: white !important; }
         .modal-pagination .swiper-pagination-bullet { background: rgba(255,255,255,0.4); }
         .modal-pagination .swiper-pagination-bullet-active { background: white; }
@@ -68,223 +91,212 @@
 </head>
 <body>
 
-<div class="header">안산교회 모바일 소식지</div>
-
-<div id="loading-screen">
-    <div class="spinner"></div>
-    주보를 읽어오는 중입니다...<br><span style="font-size: 13px; color: #888; font-weight: 300;">잠시만 기다려 주세요 ⏳</span>
+<div id="opening-container">
+    <video id="opening-video" autoplay muted playsinline preload="auto">
+        <source src="jubo_opening.mp4" type="video/mp4">
+        웹브라우저가 영상을 지원하지 않습니다.
+    </video>
 </div>
 
-<div class="swiper-container" id="main-swiper">
-    <div class="swiper-wrapper" id="bulletin-slides"></div>
-    <div class="swiper-pagination"></div>
-    <div class="swiper-button-next"></div>
-    <div class="swiper-button-prev"></div>
-    <div class="schedule-hint" style="position:absolute; bottom:30px; width:100%; z-index:10;">👆 주보를 터치하면 전체화면으로 볼 수 있습니다.</div>
-</div>
+<div id="main-content">
+    <div class="header">안산교회 모바일 소식지</div>
 
-<div class="section">
-    <div class="section-title">교회 일정표</div>
-    <div class="schedule-box">
-        <div class="schedule-row">
-            <div class="schedule-col" onclick="openZoom('this.jpg')">
-                <div class="schedule-label">이달의 일정표</div>
-                <img src="this.jpg" class="schedule-img-thumb" alt="이달의 일정" onerror="this.src='https://via.placeholder.com/300x400.png?text=업데이트+대기중'">
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        주보를 불러오는 중입니다...<br><span style="font-size: 13px; color: #888; font-weight: 300;">잠시만 기다려 주세요 ⏳</span>
+    </div>
+
+    <div class="swiper-container" id="main-swiper">
+        <div class="swiper-wrapper" id="bulletin-slides"></div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="schedule-hint" style="position:absolute; bottom:30px; width:100%; z-index:10;">👆 주보를 터치하면 전체화면으로 볼 수 있습니다.</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">교회 일정표</div>
+        <div class="schedule-box">
+            <div class="schedule-row">
+                <div class="schedule-col" onclick="openZoom('this.jpg')">
+                    <div class="schedule-label">이달의 일정표</div>
+                    <img src="this.jpg" class="schedule-img-thumb" alt="이달의 일정" onerror="this.src='https://via.placeholder.com/300x400.png?text=업데이트+대기중'">
+                </div>
+                <div class="schedule-col" onclick="openZoom('next.jpg')">
+                    <div class="schedule-label">다음달 일정표</div>
+                    <img src="next.jpg" class="schedule-img-thumb" alt="다음달 일정" onerror="this.src='https://via.placeholder.com/300x400.png?text=업데이트+대기중'">
+                </div>
             </div>
-            <div class="schedule-col" onclick="openZoom('next.jpg')">
-                <div class="schedule-label">다음달 일정표</div>
-                <img src="next.jpg" class="schedule-img-thumb" alt="다음달 일정" onerror="this.src='https://via.placeholder.com/300x400.png?text=업데이트+대기중'">
+            <div class="schedule-col" style="border-right: none;" onclick="openZoom('year.jpg')">
+                <div class="schedule-label">2026 연간 일정표</div>
+                <img src="year.jpg" class="schedule-img-thumb" style="max-height: 150px; object-fit: cover;" alt="연간 일정" onerror="this.src='https://via.placeholder.com/800x300.png?text=업데이트+대기중'">
             </div>
         </div>
-        <div class="schedule-col" style="border-right: none;" onclick="openZoom('year.jpg')">
-            <div class="schedule-label">2026 연간 일정표</div>
-            <img src="year.jpg" class="schedule-img-thumb" style="max-height: 150px; object-fit: cover;" alt="연간 일정" onerror="this.src='https://via.placeholder.com/800x300.png?text=업데이트+대기중'">
+        <div class="schedule-hint">👆 이미지를 터치하시면 원본으로 확대할 수 있습니다.</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">소식 및 바로가기</div>
+        <div class="dropdown-wrapper">
+            <div class="dropdown-header">안산교회 유튜브 링크모음</div>
+            <div class="panel">
+                <a href="https://www.youtube.com/playlist?list=PLADscL7WFTv7Fzcn9hYcIldyjm-HLGSkb" target="_blank">📺 1. 안산교회 말씀 다시듣기</a>
+                <a href="https://www.youtube.com/@%EC%83%9D%EB%AA%85%EC%9D%98%EB%A7%90%EC%94%80%EC%84%A0%EA%B5%90%ED%9A%8C%EC%95%88%EC%82%B0" target="_blank">🎥 2. 안산교회 유튜브 채널</a>
+                <a href="https://ansan.jbch.org/index.php?flag=1&chId=89" target="_blank">🌐 3. 안산교회 홈페이지</a>
+                <a href="https://www.jbch.org/ko/" target="_blank">🌐 4. 생명의 말씀 선교회</a>
+            </div>
         </div>
     </div>
-    <div class="schedule-hint">👆 이미지를 터치하시면 원본으로 확대할 수 있습니다.</div>
-</div>
 
-<div class="section">
-    <div class="section-title">소식 및 바로가기</div>
-    <div class="dropdown-wrapper">
-        <div class="dropdown-header">안산교회 유튜브 링크모음</div>
-        <div class="panel">
-            <a href="https://www.youtube.com/playlist?list=PLADscL7WFTv7Fzcn9hYcIldyjm-HLGSkb" target="_blank">📺 1. 안산교회 말씀 다시듣기</a>
-            <a href="https://www.youtube.com/@%EC%83%9D%EB%AA%85%EC%9D%98%EB%A7%90%EC%94%80%EC%84%A0%EA%B5%90%ED%9A%8C%EC%95%88%EC%82%B0" target="_blank">🎥 2. 안산교회 유튜브 채널</a>
-            <a href="https://ansan.jbch.org/index.php?flag=1&chId=89" target="_blank">🌐 3. 안산교회 홈페이지</a>
-            <a href="https://www.jbch.org/ko/" target="_blank">🌐 4. 생명의 말씀 선교회</a>
+    <div class="section">
+        <div class="section-title">성도 사업장 소개</div>
+        <div class="business-card" id="business-container">
+            <h3 id="biz-title">🏢 데이터를 불러오는 중...</h3>
+            <p id="biz-desc">잠시만 기다려주세요.</p>
+            <p id="biz-info" style="margin-top: 15px; font-size: 13px; color: #999; font-weight: 300;"></p>
         </div>
     </div>
-</div>
 
-<div class="section">
-    <div class="section-title">성도 사업장 소개</div>
-    <div class="business-card" id="business-container">
-        <h3 id="biz-title">🏢 데이터를 불러오는 중...</h3>
-        <p id="biz-desc">잠시만 기다려주세요.</p>
-        <p id="biz-info" style="margin-top: 15px; font-size: 13px; color: #999; font-weight: 300;"></p>
+    <div class="section" style="padding-bottom: 50px; text-align: center; color: #bbb; font-size: 12px; border-bottom: none; font-weight: 300;">
+        ⓒ 안산교회. 모든 성도님을 사랑하고 축복합니다.
     </div>
-</div>
 
-<div class="section" style="padding-bottom: 50px; text-align: center; color: #bbb; font-size: 12px; border-bottom: none; font-weight: 300;">
-    ⓒ 안산교회. 모든 성도님을 사랑하고 축복합니다.
-</div>
-
-<div id="zoom-modal">
-    <div class="close-btn" onclick="closeZoom()">✕</div>
-    <div class="swiper-container" id="modal-swiper" style="display: block; background: transparent; height: 100%;">
-        <div class="swiper-wrapper">
-            <div class="swiper-slide" style="background: transparent;">
-                <div class="swiper-zoom-container">
-                    <img id="zoom-image" src="" style="max-width: 100%; max-height: 90vh; border-radius: 0;">
+    <div id="zoom-modal">
+        <div class="close-btn" onclick="closeZoom()">✕</div>
+        <div class="swiper-container" id="modal-swiper" style="display: block; background: transparent; height: 100%;">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide" style="background: transparent;">
+                    <div class="swiper-zoom-container">
+                        <img id="zoom-image" src="" style="max-width: 100%; max-height: 90vh; border-radius: 0;">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<div id="bulletin-modal">
-    <div class="close-btn" onclick="closeBulletinModal()">✕</div>
-    <div class="swiper-container" id="bulletin-modal-swiper" style="display: block; background: transparent; height: 100%; padding-bottom: 0;">
-        <div class="swiper-wrapper" id="bulletin-modal-wrapper"></div>
-        <div class="swiper-pagination modal-pagination" style="bottom: 20px !important;"></div>
-        <div class="swiper-button-next modal-nav"></div>
-        <div class="swiper-button-prev modal-nav"></div>
+    <div id="bulletin-modal">
+        <div class="close-btn" onclick="closeBulletinModal()">✕</div>
+        <div class="swiper-container" id="bulletin-modal-swiper" style="display: block; background: transparent; height: 100%; padding-bottom: 0;">
+            <div class="swiper-wrapper" id="bulletin-modal-wrapper"></div>
+            <div class="swiper-pagination modal-pagination" style="bottom: 20px !important;"></div>
+            <div class="swiper-button-next modal-nav"></div>
+            <div class="swiper-button-prev modal-nav"></div>
+        </div>
     </div>
 </div>
 
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 <script>
-    // --- 1. 주보 이미지 로딩 및 자르기 ---
-    const img = new Image();
-    img.src = "jubo.jpg"; 
-    
-    // 전체화면 모달에 넣을 잘린 이미지 주소들을 보관할 배열
-    let bulletinImages = []; 
+    // --- 💡 [핵심 추가] 오프닝 영상 처리 로직 ---
+    const video = document.getElementById('opening-video');
+    const container = document.getElementById('opening-container');
+    const mainContent = document.getElementById('main-content');
 
-    img.onload = async function() {
-        const cols = 4; const rows = 2;
-        const pW = img.width / cols; const pH = img.height / rows;
-        const scale = 3; 
-
-        const order = [
-            { r: 0, c: 3 }, { r: 1, c: 0 }, { r: 1, c: 1 }, { r: 1, c: 2 },
-            { r: 1, c: 3 }, { r: 0, c: 0 }, { r: 0, c: 1 }, { r: 0, c: 2 }
-        ];
-
-        const wrapper = document.getElementById('bulletin-slides');
-        const promises = order.map((pos, index) => {
-            return new Promise(resolve => {
-                const canvas = document.createElement('canvas');
-                canvas.width = pW * scale; canvas.height = pH * scale;
-                const ctx = canvas.getContext('2d');
-                ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
-                ctx.drawImage(img, pos.c * pW, pos.r * pH, pW, pH, 0, 0, pW * scale, pH * scale);
-                
-                canvas.toBlob(blob => {
-                    const blobUrl = URL.createObjectURL(blob);
-                    bulletinImages[index] = blobUrl; // 잘린 이미지를 배열에 저장
-                    
-                    // 클릭 시 전체화면 모달이 해당 페이지(index)부터 열리도록 설정
-                    resolve(`<div class="swiper-slide" onclick="openBulletinModal(${index})"><div class="swiper-zoom-container"><img src="${blobUrl}"></div></div>`);
-                }, 'image/jpeg', 1.0); 
-            });
-        });
-
-        const slides = await Promise.all(promises);
-        wrapper.innerHTML = slides.join('');
+    // 영상 재생이 끝났을 때의 행동
+    video.onended = function() {
+        // 오프닝 컨테이너를 부드럽게 페이드 아웃 시킴
+        container.style.opacity = '0';
         
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('main-swiper').classList.add('loaded');
-
-        // 메인 화면용 스와이퍼 (여기서는 단순 스와이프만 제공)
-        new Swiper('#main-swiper', {
-            pagination: { el: '#main-swiper .swiper-pagination', clickable: true },
-            navigation: { nextEl: '#main-swiper .swiper-button-next', prevEl: '#main-swiper .swiper-button-prev' }
-        });
+        // 0.5초 뒤에 오프닝 컨테이너를 아예 없애고, 메인 콘텐츠를 보여줌
+        setTimeout(function() {
+            container.style.display = 'none'; // 오프닝 컨테이너 제거
+            mainContent.classList.add('show'); // 메인 콘텐츠 보이기
+            
+            // [핵심 유지] 메인 콘텐츠가 나타난 뒤에 기존 주보 로딩 로직을 실행
+            loadJubo(); 
+        }, 500); 
     };
 
-    // --- 2. 주보 전체화면 줌 기능 (모달) 로직 ---
-    let bulletinModalSwiper;
+    // 혹시라도 영상 로딩이 실패할 경우를 대비해, 2초 뒤에는 강제로 오프닝을 끄고 메인으로 넘김
+    setTimeout(function() {
+        if (container.style.display !== 'none') {
+            video.onended(); // 영상 종료 시와 동일한 로직 실행
+        }
+    }, 2000);
 
+
+    // --- [핵심 유지] 기존 주보 로딩 및 자르기 로직 (함수로 감쌈) ---
+    function loadJubo() {
+        const img = new Image();
+        img.src = "jubo.jpg"; 
+        
+        let bulletinImages = []; 
+
+        img.onload = async function() {
+            const cols = 4; const rows = 2;
+            const pW = img.width / cols; const pH = img.height / rows;
+            const scale = 3; 
+
+            const order = [
+                { r: 0, c: 3 }, { r: 1, c: 0 }, { r: 1, c: 1 }, { r: 1, c: 2 },
+                { r: 1, c: 3 }, { r: 0, c: 0 }, { r: 0, c: 1 }, { r: 0, c: 2 }
+            ];
+
+            const wrapper = document.getElementById('bulletin-slides');
+            const promises = order.map((pos, index) => {
+                return new Promise(resolve => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = pW * scale; canvas.height = pH * scale;
+                    const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(img, pos.c * pW, pos.r * pH, pW, pH, 0, 0, pW * scale, pH * scale);
+                    
+                    canvas.toBlob(blob => {
+                        const blobUrl = URL.createObjectURL(blob);
+                        bulletinImages[index] = blobUrl; 
+                        
+                        resolve(`<div class="swiper-slide" onclick="openBulletinModal(${index})"><div class="swiper-zoom-container"><img src="${blobUrl}"></div></div>`);
+                    }, 'image/jpeg', 1.0); 
+                });
+            });
+
+            const slides = await Promise.all(promises);
+            wrapper.innerHTML = slides.join('');
+            
+            // 주보 작업이 다 끝나면 기존 로딩창을 숨김
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('main-swiper').classList.add('loaded');
+
+            new Swiper('#main-swiper', {
+                pagination: { el: '#main-swiper .swiper-pagination', clickable: true },
+                navigation: { nextEl: '#main-swiper .swiper-button-next', prevEl: '#main-swiper .swiper-button-prev' },
+                observer: true, observeParents: true
+            });
+        };
+    }
+
+    // --- [핵심 유지] 기존 모달 및 드롭다운, 스프레드시트 로직 ---
+    let bulletinModalSwiper;
     function openBulletinModal(startIndex) {
         const wrapper = document.getElementById('bulletin-modal-wrapper');
-        
-        // 모달 안에 슬라이드가 아직 안 만들어져 있다면 8장을 생성
         if (wrapper.innerHTML === '') {
             wrapper.innerHTML = bulletinImages.map(url => 
                 `<div class="swiper-slide" style="background: transparent;"><div class="swiper-zoom-container"><img src="${url}" style="max-width: 100%; max-height: 90vh; border-radius: 0;"></div></div>`
             ).join('');
         }
-        
         document.getElementById('bulletin-modal').style.display = 'flex';
-        
         if (!bulletinModalSwiper) {
-            // 스와이퍼 최초 생성
             bulletinModalSwiper = new Swiper('#bulletin-modal-swiper', {
-                initialSlide: startIndex, // 터치한 페이지 번호부터 시작
-                zoom: { maxRatio: 4 },
+                initialSlide: startIndex, zoom: { maxRatio: 4 },
                 pagination: { el: '#bulletin-modal-swiper .swiper-pagination', clickable: true },
                 navigation: { nextEl: '#bulletin-modal-swiper .swiper-button-next', prevEl: '#bulletin-modal-swiper .swiper-button-prev' },
                 observer: true, observeParents: true
             });
         } else {
-            // 이미 생성되어 있다면 터치한 페이지로 바로 이동
-            bulletinModalSwiper.slideTo(startIndex, 0);
-            bulletinModalSwiper.zoom.out();
-            bulletinModalSwiper.update();
+            bulletinModalSwiper.slideTo(startIndex, 0); bulletinModalSwiper.zoom.out(); bulletinModalSwiper.update();
         }
     }
-
-    function closeBulletinModal() {
-        document.getElementById('bulletin-modal').style.display = 'none';
-        if (bulletinModalSwiper) bulletinModalSwiper.zoom.out();
-    }
-
-    // --- 3. 일정표 줌 기능 (모달) 로직 ---
+    function closeBulletinModal() { document.getElementById('bulletin-modal').style.display = 'none'; if (bulletinModalSwiper) bulletinModalSwiper.zoom.out(); }
     let modalSwiper; 
-
     function openZoom(imageSrc) {
-        document.getElementById('zoom-image').src = imageSrc;
-        document.getElementById('zoom-modal').style.display = 'flex';
-        
-        if (!modalSwiper) {
-            modalSwiper = new Swiper('#modal-swiper', {
-                zoom: { maxRatio: 5 }, observer: true, observeParents: true
-            });
-        } else {
-            modalSwiper.zoom.out(); modalSwiper.update();
-        }
+        document.getElementById('zoom-image').src = imageSrc; document.getElementById('zoom-modal').style.display = 'flex';
+        if (!modalSwiper) { modalSwiper = new Swiper('#modal-swiper', { zoom: { maxRatio: 5 }, observer: true, observeParents: true }); } 
+        else { modalSwiper.zoom.out(); modalSwiper.update(); }
     }
-
-    function closeZoom() {
-        document.getElementById('zoom-modal').style.display = 'none';
-        if (modalSwiper) modalSwiper.zoom.out();
-    }
-
-    // --- 4. 드롭다운(아코디언) 메뉴 동작 ---
+    function closeZoom() { document.getElementById('zoom-modal').style.display = 'none'; if (modalSwiper) modalSwiper.zoom.out(); }
     const dropdownHeader = document.querySelector(".dropdown-header");
-    dropdownHeader.addEventListener("click", function() {
-        this.classList.toggle("active");
-        const panel = this.nextElementSibling;
-        if (panel.style.maxHeight) { panel.style.maxHeight = null; } 
-        else { panel.style.maxHeight = panel.scrollHeight + "px"; }
-    });
-
-    // --- 5. 스프레드시트 사업장 연동 ---
+    dropdownHeader.addEventListener("click", function() { this.classList.toggle("active"); const panel = this.nextElementSibling; if (panel.style.maxHeight) { panel.style.maxHeight = null; } else { panel.style.maxHeight = panel.scrollHeight + "px"; } });
     const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQAP619mjGoRocR22-JnKQMxDng3n5S6Z5ShfeM89YRjE-gHJe-ubckYrpJjbSHq81sYM_E3CXeSYCC/pub?gid=0&single=true&output=csv";
-    fetch(sheetUrl).then(res => res.text()).then(csvText => {
-        const getVal = (keyword) => {
-            const match = csvText.match(new RegExp(`^.*?${keyword}.*?,(.*)$`, 'm'));
-            return match ? match[1].trim().replace(/^"|"$/g, '') : '';
-        };
-        document.getElementById('biz-title').innerText = `🏢 ${getVal('상호명')||'만나 식당'} (${getVal('성도명')||'홍길동'})`;
-        document.getElementById('biz-desc').innerText = getVal('소개')||'환영합니다.';
-        document.getElementById('biz-info').innerHTML = `📍 위치: ${getVal('위치')||'-'}<br>📞 문의: ${getVal('연락처')||'-'}`;
-    }).catch(e => {
-        document.getElementById('biz-title').innerText = "🏢 사업장 안내";
-        document.getElementById('biz-desc').innerText = "준비 중입니다.";
-    });
+    fetch(sheetUrl).then(res => res.text()).then(csvText => { const getVal = (keyword) => { const match = csvText.match(new RegExp(`^.*?${keyword}.*?,(.*)$`, 'm')); return match ? match[1].trim().replace(/^"|"$/g, '') : ''; }; document.getElementById('biz-title').innerText = `🏢 ${getVal('상호명')||'만나 식당'} (${getVal('성도명')||'홍길동'})`; document.getElementById('biz-desc').innerText = getVal('소개')||'환영합니다.'; document.getElementById('biz-info').innerHTML = `📍 위치: ${getVal('위치')||'-'}<br>📞 문의: ${getVal('연락처')||'-'}`; }).catch(e => { document.getElementById('biz-title').innerText = "🏢 사업장 안내"; document.getElementById('biz-desc').innerText = "준비 중입니다."; });
 </script>
 </body>
 </html>
