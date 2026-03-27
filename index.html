@@ -46,16 +46,9 @@
         .section-title { font-size: 19px; font-weight: 700; color: #004D7F; margin-bottom: 20px; display: flex; align-items: center; letter-spacing: -0.5px; }
         .section-title::before { content: "🕊️"; margin-right: 10px; font-size: 20px; }
         
-        /* 💡 [핵심 추가] 스크롤 애니메이션 클래스 */
-        .reveal {
-            opacity: 0;
-            transform: translateY(40px); /* 처음에 아래로 40px 내려가 있음 */
-            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* 고급스럽고 부드러운 속도 조절 */
-        }
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0); /* 원래 위치로 스르륵 복귀 */
-        }
+        /* 스크롤 애니메이션 클래스 */
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
 
         /* 5. 일정표 디자인 */
         .schedule-box { background: #fff; border: 1px solid #E6E8EB; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,77,127,0.05); }
@@ -64,13 +57,12 @@
         .schedule-col:first-child { border-right: 1px solid #E6E8EB; }
         .schedule-col:active { background: #f0f4f8; }
         .schedule-label { font-weight: 700; color: #004D7F; margin-bottom: 10px; font-size: 15px; }
-        .schedule-img-thumb { width: 100%; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: block; }
+        .schedule-img-thumb { width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: block; }
         .schedule-hint { font-size: 12px; color: #888; text-align: center; margin-top: 10px; display: flex; justify-content: center; align-items: center; }
         
-        /* 6. 전체화면 팝업(모달) */
-        #zoom-modal, #bulletin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; justify-content: center; }
+        /* 6. 전체화면 팝업(모달) - 이제 주보 전용으로만 사용됨 */
+        #bulletin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; justify-content: center; }
         .close-btn { position: absolute; top: 15px; right: 20px; color: white; font-size: 30px; font-weight: bold; cursor: pointer; z-index: 10000; padding: 10px; }
-        
         .modal-nav { color: white !important; }
         .modal-pagination .swiper-pagination-bullet { background: rgba(255,255,255,0.4); }
         .modal-pagination .swiper-pagination-bullet-active { background: white; }
@@ -121,21 +113,21 @@
         <div class="section-title">교회 일정표</div>
         <div class="schedule-box">
             <div class="schedule-row">
-                <div class="schedule-col" onclick="openZoom('this.jpg')">
+                <div class="schedule-col" onclick="window.open('this.jpg', '_blank')">
                     <div class="schedule-label">이달의 일정표</div>
                     <img src="this.jpg" class="schedule-img-thumb" alt="이달의 일정" onerror="this.src='https://via.placeholder.com/300x400.png?text=업데이트+대기중'">
                 </div>
-                <div class="schedule-col" onclick="openZoom('next.jpg')">
+                <div class="schedule-col" onclick="window.open('next.jpg', '_blank')">
                     <div class="schedule-label">다음달 일정표</div>
                     <img src="next.jpg" class="schedule-img-thumb" alt="다음달 일정" onerror="this.src='https://via.placeholder.com/300x400.png?text=업데이트+대기중'">
                 </div>
             </div>
-            <div class="schedule-col" style="border-right: none;" onclick="openZoom('year.jpg')">
+            <div class="schedule-col" style="border-right: none;" onclick="window.open('year.jpg', '_blank')">
                 <div class="schedule-label">2026 연간 일정표</div>
-                <img src="year.jpg" class="schedule-img-thumb" style="max-height: 150px; object-fit: cover;" alt="연간 일정" onerror="this.src='https://via.placeholder.com/800x300.png?text=업데이트+대기중'">
+                <img src="year.jpg" class="schedule-img-thumb" alt="연간 일정" onerror="this.src='https://via.placeholder.com/800x300.png?text=업데이트+대기중'">
             </div>
         </div>
-        <div class="schedule-hint">👆 이미지를 터치하시면 원본으로 확대할 수 있습니다.</div>
+        <div class="schedule-hint">👆 이미지를 터치하시면 가장 선명한 원본을 보실 수 있습니다.</div>
     </div>
 
     <div class="section reveal">
@@ -163,18 +155,6 @@
         ⓒ 안산교회. 모든 성도님을 사랑하고 축복합니다.
     </div>
 
-    <div id="zoom-modal">
-        <div class="close-btn" onclick="closeZoom()">✕</div>
-        <div class="swiper-container" id="modal-swiper" style="display: block; background: transparent; height: 100%;">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide" style="background: transparent;">
-                    <div class="swiper-zoom-container">
-                        <img id="zoom-image" src="" style="max-width: 100%; max-height: 90vh; border-radius: 0;">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     <div id="bulletin-modal">
         <div class="close-btn" onclick="closeBulletinModal()">✕</div>
         <div class="swiper-container" id="bulletin-modal-swiper" style="display: block; background: transparent; height: 100%; padding-bottom: 0;">
@@ -188,7 +168,6 @@
 
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 <script>
-    // --- 🎬 영상 처리 로직 ---
     const video = document.getElementById('opening-video');
     const container = document.getElementById('opening-container');
     const mainContent = document.getElementById('main-content');
@@ -199,23 +178,18 @@
             container.style.display = 'none';
             mainContent.classList.add('show');
             loadJubo(); 
-            initScrollAnimation(); // 💡 영상이 끝나고 메인 화면이 켜지면 애니메이션 감지 시작!
+            initScrollAnimation();
         }, 500); 
     };
 
     let fallbackTimer = setTimeout(function() {
-        if (container.style.display !== 'none') {
-            video.onended(); 
-        }
+        if (container.style.display !== 'none') { video.onended(); }
     }, 10000); 
 
-    video.onerror = function() {
-        video.onended();
-    };
+    video.onerror = function() { video.onended(); };
 
     let bulletinImages = []; 
 
-    // --- 주보 로딩 및 스와이퍼 자르기 함수 ---
     function loadJubo() {
         const img = new Image();
         img.src = "jubo.jpg"; 
@@ -261,25 +235,20 @@
         };
     }
 
-    // --- 💡 [핵심 추가] 스크롤 애니메이션 작동 로직 ---
     function initScrollAnimation() {
-        // 화면에 요소가 15% 정도 보일 때 'active' 클래스를 붙여서 애니메이션 실행
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('active');
-                    // 한 번 나타난 구역은 계속 보이게 처리
                     observer.unobserve(entry.target);
                 }
             });
         }, { threshold: 0.15 });
 
-        // 'reveal' 클래스가 붙은 모든 구역을 감시
         const revealElements = document.querySelectorAll('.reveal');
         revealElements.forEach((el) => observer.observe(el));
     }
 
-    // --- 모달 창 및 나머지 스크립트 기능 ---
     let bulletinModalSwiper;
     function openBulletinModal(startIndex) {
         const wrapper = document.getElementById('bulletin-modal-wrapper');
@@ -301,14 +270,6 @@
         }
     }
     function closeBulletinModal() { document.getElementById('bulletin-modal').style.display = 'none'; if (bulletinModalSwiper) bulletinModalSwiper.zoom.out(); }
-    
-    let modalSwiper; 
-    function openZoom(imageSrc) {
-        document.getElementById('zoom-image').src = imageSrc; document.getElementById('zoom-modal').style.display = 'flex';
-        if (!modalSwiper) { modalSwiper = new Swiper('#modal-swiper', { zoom: { maxRatio: 5 }, observer: true, observeParents: true }); } 
-        else { modalSwiper.zoom.out(); modalSwiper.update(); }
-    }
-    function closeZoom() { document.getElementById('zoom-modal').style.display = 'none'; if (modalSwiper) modalSwiper.zoom.out(); }
     
     const dropdownHeader = document.querySelector(".dropdown-header");
     dropdownHeader.addEventListener("click", function() { this.classList.toggle("active"); const panel = this.nextElementSibling; if (panel.style.maxHeight) { panel.style.maxHeight = null; } else { panel.style.maxHeight = panel.scrollHeight + "px"; } });
